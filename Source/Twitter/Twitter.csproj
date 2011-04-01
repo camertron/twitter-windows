@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3EFCE395-E1DC-4520-B898-C9D5896AE3AD}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Twitter</RootNamespace>
+    <AssemblyName>Twitter</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Hammock, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libs\Hammock\bin\lib\3.5\Hammock.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\Account.cs" />
+    <Compile Include="Classes\API\BaseAPI.cs" />
+    <Compile Include="Classes\API\Basic\DirectMessage.cs" />
+    <Compile Include="Classes\API\Basic\ScaffoldObject.cs" />
+    <Compile Include="Classes\API\Exceptions.cs" />
+    <Compile Include="Classes\API\Json\FSA.cs" />
+    <Compile Include="Classes\API\Json\JsonDocument.cs" />
+    <Compile Include="Classes\API\Json\JsonNode.cs" />
+    <Compile Include="Classes\API\Json\JsonParser.cs" />
+    <Compile Include="Classes\API\Json\JsonToken.cs" />
+    <Compile Include="Classes\API\Json\JsonTokenizer.cs" />
+    <Compile Include="Classes\API\Json\JsonUtilities.cs" />
+    <Compile Include="Classes\API\RestResponseHash.cs" />
+    <Compile Include="Classes\API\Basic\Status.cs" />
+    <Compile Include="Classes\API\Streaming\StreamingAPI.cs" />
+    <Compile Include="Classes\API\Basic\BasicAPI.cs" />
+    <Compile Include="Classes\API\Basic\User.cs" />
+    <Compile Include="Classes\API\Basic\UserTimeline.cs" />
+    <Compile Include="Classes\API\Streaming\UserStream.cs" />
+    <Compile Include="Classes\AsyncContentManager.cs" />
+    <Compile Include="Classes\ResourceManager.cs" />
+    <Compile Include="Controls\ActionButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ActionButton.Designer.cs">
+      <DependentUpon>ActionButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SidebarButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SidebarButton.Designer.cs">
+      <DependentUpon>SidebarButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Timeline.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Timeline.Designer.cs">
+      <DependentUpon>Timeline.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TimelineStatus.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TimelineStatus.Designer.cs">
+      <DependentUpon>TimelineStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TweetTextField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TweetTextField.Designer.cs">
+      <DependentUpon>TweetTextField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMain.Designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPreferences.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPreferences.Designer.cs">
+      <DependentUpon>FrmPreferences.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmTweet.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTweet.Designer.cs">
+      <DependentUpon>FrmTweet.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Literals.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controllers\MainController.cs" />
+    <EmbeddedResource Include="Controls\ActionButton.resx">
+      <DependentUpon>ActionButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SidebarButton.resx">
+      <DependentUpon>SidebarButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Timeline.resx">
+      <DependentUpon>Timeline.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TimelineStatus.resx">
+      <DependentUpon>TimelineStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TweetTextField.resx">
+      <DependentUpon>TweetTextField.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmMain.resx">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPreferences.resx">
+      <DependentUpon>FrmPreferences.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTweet.resx">
+      <DependentUpon>FrmTweet.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Resources\LexerTable.csv" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
