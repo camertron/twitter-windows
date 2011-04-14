@@ -133,8 +133,8 @@ namespace Twitter
             Bitmap bmpImage;
 
             //@TODO: for production, don't look in desktop dir (duh!)
-            if (File.Exists(Path.Combine("C:/Users/le grand fromage/Desktop/avatars", Path.GetFileName(acImage.Url))))
-                bmpImage = (Bitmap)Bitmap.FromFile(Path.Combine("C:/Users/le grand fromage/Desktop/avatars", Path.GetFileName(acImage.Url)));
+            if (File.Exists(Path.Combine("../../../../Documents/test/avatars", Path.GetFileName(acImage.Url))))
+                bmpImage = (Bitmap)Bitmap.FromFile(Path.Combine("../../../../Documents/test/avatars", Path.GetFileName(acImage.Url)));
             else
             {
                 Stream stmImage = wcClient.OpenRead(acImage.Url);

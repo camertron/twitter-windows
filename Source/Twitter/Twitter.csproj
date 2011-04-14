@@ -83,6 +83,12 @@
     <Compile Include="Controls\SidebarButton.Designer.cs">
       <DependentUpon>SidebarButton.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ThinScrollbar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ThinScrollbar.Designer.cs">
+      <DependentUpon>ThinScrollbar.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Timeline.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -128,6 +134,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\SidebarButton.resx">
       <DependentUpon>SidebarButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ThinScrollbar.resx">
+      <DependentUpon>ThinScrollbar.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Timeline.resx">
       <DependentUpon>Timeline.cs</DependentUpon>

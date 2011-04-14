@@ -123,8 +123,21 @@ namespace Twitter.API.Basic
         public void GetHomeTimeline(APICallback apcCallback, object objCallbackArg, int iCount = 20, int iPage = 1, int iSinceId = -1,
                                     int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
         {
-            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("C:/Users/le grand fromage/Desktop/tweets.json").Root.ToList());
+            //@TODO: remove this testing code
+            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets.json").Root.ToList());
             apcCallback(new APICallbackArgs(true, "", utLine));
+
+            //we need this in order to talk to the UI
+            foreach (Delegate dlReceiver in apcCallback.GetInvocationList())
+            {
+                ISynchronizeInvoke isSyncInvoke = dlReceiver.Target as ISynchronizeInvoke;
+
+                if (isSyncInvoke != null && isSyncInvoke.InvokeRequired)
+                    isSyncInvoke.Invoke(apcCallback, new object[] { new APICallbackArgs(true, "", utLine) });
+                else
+                    dlReceiver.DynamicInvoke(new object[] { new APICallbackArgs(true, "", utLine) });
+            }
+
             return;
 
             CheckAuthenticated();
