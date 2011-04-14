@@ -15,11 +15,17 @@ namespace Twitter.Controls
 
         private int m_iMax = 100;
         private int m_iValue = 0;
-        private int m_iLargeChange = 10;  //the step (also the 
+        private int m_iLargeChange = 10;  //the step
+        private int m_iHandleTop = 0;
+        private int m_iHandleBottom = 0;
+
+        private SolidBrush m_bshHandleColor;
 
         public ThinScrollbar()
         {
             InitializeComponent();
+
+            m_bshHandleColor = new SolidBrush(Color.Black);
         }
 
         protected override void OnResize(EventArgs e)
@@ -36,15 +42,25 @@ namespace Twitter.Controls
             float fPercentPos = (float)m_iValue / (float)m_iMax;
 
             //this is where the top and bottom of the scroll handle should be
-            int iHandleTop = (int)((this.Height - m_iLargeChange) * fPercentPos);
-            int iHandleBottom = iHandleTop + m_iLargeChange;
+            m_iHandleTop = (int)((this.Height - m_iLargeChange) * fPercentPos);
+            m_iHandleBottom = m_iHandleTop + m_iLargeChange;
 
             //this is how tall the scroll handle should be
             int iHandleHeight = this.Height / (m_iMax / m_iLargeChange);
 
-            e.Graphics.FillEllipse(new SolidBrush(Color.Black), 0, iHandleTop, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
-            e.Graphics.FillEllipse(new SolidBrush(Color.Black), 0, iHandleBottom - C_CONTROL_WIDTH, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
-            e.Graphics.FillRectangle(new SolidBrush(Color.Black), 0, iHandleTop + (C_CONTROL_WIDTH / 2), C_CONTROL_WIDTH, (iHandleBottom - iHandleTop) - C_CONTROL_WIDTH);
+            e.Graphics.FillEllipse(m_bshHandleColor, 0, m_iHandleTop, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
+            e.Graphics.FillEllipse(m_bshHandleColor, 0, m_iHandleBottom - C_CONTROL_WIDTH, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
+            e.Graphics.FillRectangle(m_bshHandleColor, 0, m_iHandleTop + (C_CONTROL_WIDTH / 2), C_CONTROL_WIDTH, (m_iHandleBottom - m_iHandleTop) - C_CONTROL_WIDTH);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            if ((e.X >= m_iHandleTop) && (e.X <= m_iHandleBottom))
+                m_bshHandleColor.Color = Color.Red;
+            else
+                m_bshHandleColor.Color = Color.Black;
+
+            this.Invalidate();
         }
 
         public int Max
