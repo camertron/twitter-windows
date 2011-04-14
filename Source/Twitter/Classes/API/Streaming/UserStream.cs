@@ -90,8 +90,9 @@ namespace Twitter.API.Streaming
 
             m_rcClient.AddHeader("User-Agent", "Twitter/1.0");
 
-            m_iaConnectionAsync = m_rcClient.BeginRequest(rrqRequest, RequestCallback);
-            m_rcClient.CancelStreaming();  //don't know why this is necessary - maybe it isn't?
+            //@TODO: uncomment these for production
+            //m_iaConnectionAsync = m_rcClient.BeginRequest(rrqRequest, RequestCallback);
+            //m_rcClient.CancelStreaming();  //don't know why this is necessary - maybe it isn't?
         }
 
         private void RequestCallback(RestRequest rrqRequest, RestResponse rrsResponse, object objUserState)

@@ -123,6 +123,10 @@ namespace Twitter.API.Basic
         public void GetHomeTimeline(APICallback apcCallback, object objCallbackArg, int iCount = 20, int iPage = 1, int iSinceId = -1,
                                     int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
         {
+            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("C:/Users/le grand fromage/Desktop/tweets.json").Root.ToList());
+            apcCallback(new APICallbackArgs(true, "", utLine));
+            return;
+
             CheckAuthenticated();
 
             Dictionary<string, string> dssParams = new Dictionary<string, string>();

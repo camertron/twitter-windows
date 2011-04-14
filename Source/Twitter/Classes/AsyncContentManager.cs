@@ -130,9 +130,19 @@ namespace Twitter
 
         private void WorkOnImage(AsyncContent acImage, WebClient wcClient)
         {
-            Stream stmImage = wcClient.OpenRead(acImage.Url);
-            Bitmap bmpImage = (Bitmap)Bitmap.FromStream(stmImage);
-            stmImage.Close();
+            Bitmap bmpImage;
+
+            //@TODO: for production, don't look in desktop dir (duh!)
+            if (File.Exists(Path.Combine("C:/Users/le grand fromage/Desktop/avatars", Path.GetFileName(acImage.Url))))
+                bmpImage = (Bitmap)Bitmap.FromFile(Path.Combine("C:/Users/le grand fromage/Desktop/avatars", Path.GetFileName(acImage.Url)));
+            else
+            {
+                Stream stmImage = wcClient.OpenRead(acImage.Url);
+                bmpImage = (Bitmap)Bitmap.FromStream(stmImage);
+                stmImage.Close();
+            }
+
+            //bmpImage.Save("C:/Users/le grand fromage/Desktop/avatars/" + Path.GetFileName(acImage.Url));
 
             for (int i = 0; i < acImage.Callbacks.Count; i ++)
                 acImage.Callbacks[i].DynamicInvoke(this, bmpImage);
