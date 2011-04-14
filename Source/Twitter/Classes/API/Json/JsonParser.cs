@@ -124,7 +124,7 @@ namespace Twitter.API.Json
 
         public JsonDocument ParseFile(string sFile)
         {
-            return ParseStream(new StreamReader(sFile));
+             return ParseStream(new StreamReader(sFile));
         }
 
         public JsonDocument ParseString(string sParseString)

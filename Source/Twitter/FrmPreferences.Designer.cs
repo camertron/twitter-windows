@@ -42,6 +42,7 @@
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.thinScrollbar1 = new Twitter.Controls.ThinScrollbar();
             this.tcTabs.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.tpAccounts.SuspendLayout();
@@ -187,11 +188,23 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // thinScrollbar1
+            // 
+            this.thinScrollbar1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.thinScrollbar1.LargeChange = 20;
+            this.thinScrollbar1.Location = new System.Drawing.Point(418, 25);
+            this.thinScrollbar1.Max = 100;
+            this.thinScrollbar1.Name = "thinScrollbar1";
+            this.thinScrollbar1.Size = new System.Drawing.Size(10, 212);
+            this.thinScrollbar1.TabIndex = 3;
+            this.thinScrollbar1.Value = 60;
+            // 
             // FrmPreferences
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(374, 276);
+            this.ClientSize = new System.Drawing.Size(500, 276);
+            this.Controls.Add(this.thinScrollbar1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.tcTabs);
@@ -225,5 +238,6 @@
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.Button btnAdd;
+        private Controls.ThinScrollbar thinScrollbar1;
     }
 }
