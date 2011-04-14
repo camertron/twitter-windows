@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Account.cs" />
+    <Compile Include="Classes\Animation.cs" />
     <Compile Include="Classes\API\BaseAPI.cs" />
     <Compile Include="Classes\API\Basic\DirectMessage.cs" />
     <Compile Include="Classes\API\Basic\ScaffoldObject.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Classes\API\Basic\UserTimeline.cs" />
     <Compile Include="Classes\API\Streaming\UserStream.cs" />
     <Compile Include="Classes\AsyncContentManager.cs" />
+    <Compile Include="Classes\Imaging.cs" />
     <Compile Include="Classes\ResourceManager.cs" />
     <Compile Include="Controls\ActionButton.cs">
       <SubType>UserControl</SubType>

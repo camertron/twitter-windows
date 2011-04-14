@@ -14,8 +14,9 @@ namespace Twitter
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new FrmPreferences());
-            Application.Run(new FrmMain());
+
+            Application.Run(new FrmPreferences());
+            //Application.Run(new FrmMain());
             //Application.Run(new FrmTweet());
 
             if (AsyncContentManager.HasInstance)
