@@ -114,7 +114,7 @@ namespace Twitter.Controls
             using (Graphics gCanvas = Graphics.FromImage(bmpResized))
                 gCanvas.DrawImage(bmpAvatar, 0, 0, C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
 
-            m_bmpAvatar = bmpResized;
+            m_bmpAvatar = Imaging.RoundAvatarCorners(bmpResized);
             this.Invalidate();  //force redraw
         }
 
