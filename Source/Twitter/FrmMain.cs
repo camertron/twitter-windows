@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Twitter.API;
 using Twitter.API.Basic;
 using Twitter.Controls;
+using Twitter.API.Json;
 
 namespace Twitter
 {
@@ -38,6 +39,18 @@ namespace Twitter
             tmlTimeline.ReplyClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_ReplyClicked);
 
             m_ftTweetForm.TweetClicked += new FrmTweet.TweetClickedEventHandler(m_ftTweetForm_TweetClicked);
+            tsbTimelineScroller.Scroll += new ScrollEventHandler(tsbTimelineScroller_Scroll);
+
+            //@TODO: do this for testing purposes only
+            //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
+            //for (int i = 0; i < utLine.Statuses.Count; i++)
+                //tmlTimeline.Push(utLine.Statuses[i]);
+        }
+
+        private void tsbTimelineScroller_Scroll(object sender, ScrollEventArgs e)
+        {
+            float fPercentScrolled = (float)e.NewValue / 100.0f;
+            tmlTimeline.Top = -(int)((tmlTimeline.Height - this.ClientSize.Height) * fPercentScrolled);
         }
 
         private void tmlTimeline_ReplyClicked(object sender, TimelineStatus tsControl, Status stStatus)
@@ -131,18 +144,17 @@ namespace Twitter
             tsbTimelineScroller.Top = 0;
             tsbTimelineScroller.Height = this.ClientSize.Height;
 
-            UpdateScrollBar();
-
-            pnlSidebar.Height = this.ClientSize.Height;
+            //note: tmlTimeline's height is automatically set based on the number of tweets it contains
             tmlTimeline.Left = pnlSidebar.Right;
-            tmlTimeline.Height = this.ClientSize.Height;
-
-            //if (tsbTimelineScroller.Visible)
+            UpdateScrollBar();  // this has to be called before tmlTimeline's width is set because it hides/shows the scroller
+            
+            if (tsbTimelineScroller.Visible)
                 tmlTimeline.Width = this.ClientSize.Width - (pnlSidebar.Width + tsbTimelineScroller.Width);
-            //else
-                //tmlTimeline.Width = this.ClientSize.Width - pnlSidebar.Width;
+            else
+                tmlTimeline.Width = this.ClientSize.Width - pnlSidebar.Width;
 
             pbLarry.Top = pnlSidebar.Height - (pbLarry.Height + 10);
+            pnlSidebar.Height = this.ClientSize.Height;
         }
 
         private void sbbTimeline_Click(object sender, EventArgs e)
@@ -213,11 +225,11 @@ namespace Twitter
             {
                 int iLargeChange = (int)(((float)this.ClientSize.Height / (float)tmlTimeline.Height) * 100.0f);
                 tsbTimelineScroller.LargeChange = iLargeChange;
-                //tsbTimelineScroller.Visible = true;
+                tsbTimelineScroller.Visible = true;
             }
             else
             {
-                //tsbTimelineScroller.Visible = false;
+                tsbTimelineScroller.Visible = false;
             }
         }
     }

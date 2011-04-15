@@ -54,29 +54,29 @@ namespace Twitter.API.Basic
             if (aprReturn.ReturnType != null)
             {
                 if (jsDoc.Root.IsList())
-                    objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToList());
+                {
+                    //if the return type is a generic list...
+                    if (aprReturn.ReturnType.Name == "List`1")
+                    {
+                        //get an instance of the list<generic> that will have generics added to it and eventually be returned via the callback
+                        //get the type of the generic (because we'll need to make specific instances of him later)
+                        objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType);
+                        Type tListObjType = aprReturn.ReturnType.GetGenericArguments()[0];
+
+                        //dynamically invoke the Add() method of the list
+                        //what's being added: a newly minted instance of the generic class plus data via the constructor
+                        foreach (JsonObject joCur in jsDoc.Root.ToList())
+                            aprReturn.ReturnType.GetMethod("Add").Invoke(objToReturn, new Object[] { System.Activator.CreateInstance(tListObjType, joCur.ToNode()) });
+                    }
+                    else
+                        objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToList());
+                }
                 else if (jsDoc.Root.IsNode())
                     objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToNode());
             }
 
             acArgs = new APICallbackArgs(rrsResponse.StatusCode == HttpStatusCode.OK, sErrorMessage, objToReturn);
-
-            foreach (Delegate dlReceiver in aprReturn.Callback.GetInvocationList())
-            {
-                ISynchronizeInvoke isSyncInvoke = dlReceiver.Target as ISynchronizeInvoke;
-
-                try
-                {
-                    if (aprReturn.Callback != null)
-                    {
-                        if (isSyncInvoke != null && isSyncInvoke.InvokeRequired)
-                            isSyncInvoke.Invoke(aprReturn.Callback, new object[] { acArgs });
-                        else
-                            dlReceiver.DynamicInvoke(new object[] { acArgs });
-                    }
-                }
-                catch (Exception e) { }
-            }
+            aprReturn.SynchronizeInvoke(new object[] { acArgs });  //synchronously invoke the return callback
         }
 
         public void UpdateStatus(APICallback apcCallback, object objCallbackArg, string sMessage)
@@ -123,23 +123,6 @@ namespace Twitter.API.Basic
         public void GetHomeTimeline(APICallback apcCallback, object objCallbackArg, int iCount = 20, int iPage = 1, int iSinceId = -1,
                                     int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
         {
-            //@TODO: remove this testing code
-            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_single.json").Root.ToList());
-            apcCallback(new APICallbackArgs(true, "", utLine));
-
-            //we need this in order to talk to the UI
-            foreach (Delegate dlReceiver in apcCallback.GetInvocationList())
-            {
-                ISynchronizeInvoke isSyncInvoke = dlReceiver.Target as ISynchronizeInvoke;
-
-                if (isSyncInvoke != null && isSyncInvoke.InvokeRequired)
-                    isSyncInvoke.Invoke(apcCallback, new object[] { new APICallbackArgs(true, "", utLine) });
-                else
-                    dlReceiver.DynamicInvoke(new object[] { new APICallbackArgs(true, "", utLine) });
-            }
-
-            return;
-
             CheckAuthenticated();
 
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
@@ -154,20 +137,24 @@ namespace Twitter.API.Basic
             DoRequest("statuses/home_timeline.json", WebMethod.Get, dssParams, new APIReturn(apcCallback, typeof(UserTimeline), objCallbackArg));
         }
 
-        public void UserLookup(APICallback apcCallback, object objCallbackArg, List<string> lsScreenNames = null, List<string> lsUserIds = null, bool bIncludeEntities = false)
+        public void LookupUser(APICallback apcCallback, object objCallbackArg, List<string> lsScreenNames = null, List<string> lsUserIds = null, bool bIncludeEntities = false)
         {
             CheckAuthenticated();
 
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
-            AddParameter(ref dssParams, "screen_name", lsScreenNames.ToArray());
-            AddParameter(ref dssParams, "user_id", lsUserIds.ToArray());
+            if (lsScreenNames != null)
+                AddParameter(ref dssParams, "screen_name", lsScreenNames.ToArray());
+
+            if (lsUserIds != null)
+                AddParameter(ref dssParams, "user_id", lsUserIds.ToArray());
+
             AddParameter(ref dssParams, "include_entities", bIncludeEntities);
 
-            DoRequest("users/lookup.json", WebMethod.Post, dssParams, new APIReturn(apcCallback, typeof(User), objCallbackArg));
+            DoRequest("users/lookup.json", WebMethod.Post, dssParams, new APIReturn(apcCallback, typeof(List<User>), objCallbackArg));
         }
 
-        public void Favorites(APICallback apcCallback, object objCallbackArg, string sUserIdOrScreenName = "", int iPage = 1, bool bIncludeEntities = false)
+        public void GetFavorites(APICallback apcCallback, object objCallbackArg, string sUserIdOrScreenName = "", int iPage = 1, bool bIncludeEntities = false)
         {
             CheckAuthenticated();
 

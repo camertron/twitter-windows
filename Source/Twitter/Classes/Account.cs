@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Drawing;
+using Twitter.API;
 using Twitter.API.Streaming;
 using Twitter.API.Basic;
+using System.Threading;
 
 namespace Twitter
 {
@@ -15,6 +18,7 @@ namespace Twitter
         private BasicAPI m_bAPI;
         private List<Status> m_lstStatuses;
         private List<DirectMessage> m_ldmDirectMessages;
+        private User m_uUserObject = null;
 
         public Account(string sAccessToken, string sAccessSecret, string sUsername = "", string sPassword = "")
         {
@@ -25,6 +29,29 @@ namespace Twitter
             m_sAPI.Authenticate(sAccessToken, sAccessSecret, sUsername, sPassword);
 
             m_usUserStream = m_sAPI.GetUserStream();
+        }
+
+        public void Connect()
+        {
+            m_usUserStream.Connect();
+
+            Thread thdLookup = new Thread(new ThreadStart(LookupUser));
+            thdLookup.Start();
+        }
+
+        private void LookupUser()
+        {
+            m_bAPI.LookupUser(UserLookupCallback, null, new List<string>(new string[] { m_bAPI.Credentials.ClientUsername }));
+        }
+
+        private void UserLookupCallback(APICallbackArgs acArgs)
+        {
+            m_uUserObject = (User)acArgs.ResponseObject;
+        }
+
+        public User UserObject
+        {
+            get { return m_uUserObject; }
         }
 
         public UserStream UserStream
@@ -63,7 +90,6 @@ namespace Twitter
         public delegate void AccountHandler(object sender, Account actSubject);
 
         public event EventHandler AccountSwitched;
-        //public event AccountHandler AccountConnected;
         public event AccountHandler AccountAdded;
         public event AccountHandler AccountRemoved;
 
@@ -79,7 +105,7 @@ namespace Twitter
 
             //if there weren't any accounts in here before, set the newly created account as the active account
             if (base.Count == 1)
-                SwitchAccount(0);
+                m_iActiveAccountIndex = 0;
 
             if (AccountAdded != null)
                 AccountAdded(this, actNew);

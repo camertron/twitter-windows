@@ -22,6 +22,7 @@ namespace Twitter.Controls
         public event StatusOptionClickedHandler ConversationClicked;
 
         private Stack<TimelineStatus> m_stsControls;
+        private int m_iTotalControlHeight = 0;
 
         public Timeline()
         {
@@ -91,27 +92,32 @@ namespace Twitter.Controls
                 StatusTextClicked(this, ((TimelineStatus)sender).StatusObj, tstElement);
         }   
 
+        //returns final control height
         public void UpdateLayout()
         {
             if (m_stsControls != null)
             {
                 Stack<TimelineStatus>.Enumerator stsEnum = m_stsControls.GetEnumerator();
-                int iX = 0;
+                int iY = 0;
 
                 while (stsEnum.MoveNext())
                 {
-                    stsEnum.Current.Top = iX;
+                    stsEnum.Current.Top = iY;
                     stsEnum.Current.Width = this.Width;
                     stsEnum.Current.Left = 0;
                     stsEnum.Current.Invalidate();
-                    iX += stsEnum.Current.Height;
+                    iY += stsEnum.Current.Height;
                 }
+
+                m_iTotalControlHeight = iY;
+                this.Height = iY;
             }
         }
 
         protected override void OnResize(EventArgs e)
         {
-            UpdateLayout();
+            //don't change the height - UpdateLayout will do that every time a tweet is added/removed
+            this.Height = m_iTotalControlHeight;
         }
     }
 }

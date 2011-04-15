@@ -23,6 +23,15 @@ namespace Twitter
             m_aclAccounts.AccountRemoved += new AccountList.AccountHandler(m_aclAccounts_AccountRemoved);
 
             m_aclAccounts.LoadFromFile(Literals.C_ACCOUNT_FILE);
+
+            //connect default account and populate the timeline!
+            //this null check is necessary because this method is used by the forms designer
+            //as well as during runtime
+            if (m_aclAccounts.ActiveAccount != null)
+            {
+                //@TODO: uncomment for production
+                m_aclAccounts.ActiveAccount.Connect();
+            }
         }
 
         #region Local Events

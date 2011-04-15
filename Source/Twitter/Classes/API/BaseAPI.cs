@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
+using System.ComponentModel;
 using Hammock;
 using Hammock.Authentication.OAuth;
 using Hammock.Web;
@@ -194,7 +195,7 @@ namespace Twitter.API
                     if (((bool)objNewParam))
                         dssParams[sParamKey] = "1";
                 }
-                else if (objNewParam.GetType() == typeof(string[]))
+                else if ((objNewParam.GetType() == typeof(string[])) && (((string[])objNewParam).Length > 0))
                     dssParams[sParamKey] = String.Join(",", (string[])objNewParam);
             }
         }
@@ -226,6 +227,28 @@ namespace Twitter.API
         public object CallbackArg
         {
             get { return m_objCallbackArg; }
+        }
+
+        public void SynchronizeInvoke(object[] oaArgs)
+        {
+            APIReturn.SynchronizeInvoke(m_apcCallback, oaArgs);
+        }
+
+        public static void SynchronizeInvoke(Delegate dlHandler, object[] oaArgs)
+        {
+            foreach (Delegate dlReceiver in dlHandler.GetInvocationList())
+            {
+                ISynchronizeInvoke isSyncInvoke = dlReceiver.Target as ISynchronizeInvoke;
+
+                try
+                {
+                    if (isSyncInvoke != null && isSyncInvoke.InvokeRequired)
+                        isSyncInvoke.Invoke(dlHandler, oaArgs);
+                    else
+                        dlReceiver.DynamicInvoke(oaArgs);
+                }
+                catch (Exception e) { }
+            }
         }
     }
 

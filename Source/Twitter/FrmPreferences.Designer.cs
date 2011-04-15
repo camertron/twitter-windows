@@ -187,17 +187,6 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // thinScrollbar1
-            // 
-            this.thinScrollbar1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.thinScrollbar1.LargeChange = 20;
-            this.thinScrollbar1.Location = new System.Drawing.Point(448, 12);
-            this.thinScrollbar1.Max = 100;
-            this.thinScrollbar1.Name = "thinScrollbar1";
-            this.thinScrollbar1.Size = new System.Drawing.Size(7, 253);
-            this.thinScrollbar1.TabIndex = 3;
-            this.thinScrollbar1.Value = 60;
-            // 
             // FrmPreferences
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace Twitter.Controls
 {
@@ -14,7 +15,7 @@ namespace Twitter.Controls
     {
         public delegate void TextElementClickHandler(object sender, TweetTextElement tstElement);
         public event TextElementClickHandler TextElementClicked;
-        public event EventHandler TextChanged;
+        public new event EventHandler TextChanged;
 
         private Pen m_pnBorderPen;
         private TimelineStatusText m_tstStatusText;
@@ -25,6 +26,19 @@ namespace Twitter.Controls
         private int m_iControlMargin;
 
         private const int C_TEXT_HEIGHT = 15;
+
+        [DllImport("user32.dll", EntryPoint = "HideCaret")]
+        public static extern long HideCaret(IntPtr hwnd);
+
+        protected override void WndProc(ref Message m)
+        {
+            try
+            {
+                base.WndProc(ref m);
+                HideCaret(rtbTextBox.Handle);
+            }
+            catch { }  //can throw errors when this object is being destroyed
+        }
 
         public TweetTextField()
         {

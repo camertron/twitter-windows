@@ -34,10 +34,6 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-<<<<<<< HEAD
-            this.Controls.Add(this.vScrollBar1);
-=======
->>>>>>> c5cebd755ff4b6b00792ee48f55dbfad4560ee7a
             this.DoubleBuffered = true;
             this.Name = "ThinScrollbar";
             this.Size = new System.Drawing.Size(371, 631);

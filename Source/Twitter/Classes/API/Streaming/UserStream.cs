@@ -66,21 +66,7 @@ namespace Twitter.API.Streaming
             UserTimeline utInitial = (UserTimeline)acArgs.ResponseObject;
 
             for (int i = utInitial.Statuses.Count - 1; i >= 0; i--)
-            {
-                foreach (Delegate dlReceiver in Receive.GetInvocationList())
-                {
-                    ISynchronizeInvoke isSyncInvoke = dlReceiver.Target as ISynchronizeInvoke;
-
-                    try
-                    {
-                        if (isSyncInvoke != null && isSyncInvoke.InvokeRequired)
-                            isSyncInvoke.Invoke(Receive, new object[] { this, new JsonDocument(utInitial.Statuses[i].Object) });
-                        else
-                            dlReceiver.DynamicInvoke(new object[] { this, new JsonDocument(utInitial.Statuses[i].Object) });
-                    }
-                    catch (Exception e) { }
-                }
-            }
+                APIReturn.SynchronizeInvoke(Receive, new object[] { this, new JsonDocument(utInitial.Statuses[i].Object) });
 
             //construct and open streaming request
             RestRequest rrqRequest = new RestRequest
@@ -91,8 +77,8 @@ namespace Twitter.API.Streaming
             m_rcClient.AddHeader("User-Agent", "Twitter/1.0");
 
             //@TODO: uncomment these for production
-            //m_iaConnectionAsync = m_rcClient.BeginRequest(rrqRequest, RequestCallback);
-            //m_rcClient.CancelStreaming();  //don't know why this is necessary - maybe it isn't?
+            m_iaConnectionAsync = m_rcClient.BeginRequest(rrqRequest, RequestCallback);
+            m_rcClient.CancelStreaming();  //don't know why this is necessary - maybe it isn't?
         }
 
         private void RequestCallback(RestRequest rrqRequest, RestResponse rrsResponse, object objUserState)

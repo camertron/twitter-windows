@@ -239,7 +239,7 @@
             this.tmlTimeline.BackColor = System.Drawing.Color.White;
             this.tmlTimeline.Location = new System.Drawing.Point(67, 0);
             this.tmlTimeline.Name = "tmlTimeline";
-            this.tmlTimeline.Size = new System.Drawing.Size(459, 676);
+            this.tmlTimeline.Size = new System.Drawing.Size(459, 0);
             this.tmlTimeline.TabIndex = 3;
             // 
             // tsbTimelineScroller
@@ -258,6 +258,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(538, 675);
             this.Controls.Add(this.tsbTimelineScroller);
             this.Controls.Add(this.pnlSidebar);
