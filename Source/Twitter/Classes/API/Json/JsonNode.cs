@@ -61,7 +61,14 @@ namespace Twitter.API.Json
 
         public List<JsonObject> ToList()
         {
-            return (List<JsonObject>)m_objInternalObject;
+            if (m_objInternalObject.GetType() == typeof(JsonObject))
+            {
+                List<JsonObject> ljoList = new List<JsonObject>();
+                ljoList.Add((JsonObject)m_objInternalObject);
+                return ljoList;
+            }
+            else
+                return (List<JsonObject>)m_objInternalObject;
         }
 
         public override string ToString()

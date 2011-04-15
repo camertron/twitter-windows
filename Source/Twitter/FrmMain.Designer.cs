@@ -48,6 +48,7 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiPreferences = new System.Windows.Forms.ToolStripMenuItem();
             this.tmlTimeline = new Twitter.Controls.Timeline();
+            this.tsbTimelineScroller = new Twitter.Controls.ThinScrollbar();
             this.pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLarry)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -238,14 +239,27 @@
             this.tmlTimeline.BackColor = System.Drawing.Color.White;
             this.tmlTimeline.Location = new System.Drawing.Point(67, 0);
             this.tmlTimeline.Name = "tmlTimeline";
-            this.tmlTimeline.Size = new System.Drawing.Size(472, 676);
+            this.tmlTimeline.Size = new System.Drawing.Size(459, 676);
             this.tmlTimeline.TabIndex = 3;
+            // 
+            // tsbTimelineScroller
+            // 
+            this.tsbTimelineScroller.BackColor = System.Drawing.Color.White;
+            this.tsbTimelineScroller.HandleColor = System.Drawing.Color.DarkGray;
+            this.tsbTimelineScroller.LargeChange = 30;
+            this.tsbTimelineScroller.Location = new System.Drawing.Point(529, 1);
+            this.tsbTimelineScroller.Max = 100;
+            this.tsbTimelineScroller.Name = "tsbTimelineScroller";
+            this.tsbTimelineScroller.Size = new System.Drawing.Size(7, 663);
+            this.tsbTimelineScroller.TabIndex = 6;
+            this.tsbTimelineScroller.Value = 0;
             // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(538, 675);
+            this.Controls.Add(this.tsbTimelineScroller);
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tmlTimeline);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -282,6 +296,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiMarkAllRead;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem tsmiPreferences;
+        private Controls.ThinScrollbar tsbTimelineScroller;
 
     }
 }

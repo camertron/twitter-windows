@@ -90,12 +90,6 @@ namespace Twitter
             CallbackCheckSucceeded("There was an error un-favoriting that tweet.", "Un-favorite Error", acArgs);
         }
 
-        private void CallbackCheckSucceeded(string sMessage, string sTitle, APICallbackArgs acArgs)
-        {
-            if (!acArgs.Succeeded)
-                MessageBox.Show(sMessage + "\n\nTwitter said: \"" + acArgs.ErrorMessage + "\"", sTitle, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        }
-
         #endregion
 
         #region Streaming Events
@@ -103,6 +97,7 @@ namespace Twitter
         protected override void OnTweetReceived(Status stReceived)
         {
             tmlTimeline.Push(stReceived);
+            UpdateScrollBar();
         }
 
         protected override void OnDirectMessageReceived(DirectMessage dmReceived)
@@ -132,10 +127,21 @@ namespace Twitter
 
         protected override void OnResize(EventArgs e)
         {
+            tsbTimelineScroller.Left = this.ClientSize.Width - tsbTimelineScroller.Width;
+            tsbTimelineScroller.Top = 0;
+            tsbTimelineScroller.Height = this.ClientSize.Height;
+
+            UpdateScrollBar();
+
             pnlSidebar.Height = this.ClientSize.Height;
             tmlTimeline.Left = pnlSidebar.Right;
-            tmlTimeline.Width = this.ClientSize.Width - pnlSidebar.Width;
-            tmlTimeline.Height = this.Height;
+            tmlTimeline.Height = this.ClientSize.Height;
+
+            //if (tsbTimelineScroller.Visible)
+                tmlTimeline.Width = this.ClientSize.Width - (pnlSidebar.Width + tsbTimelineScroller.Width);
+            //else
+                //tmlTimeline.Width = this.ClientSize.Width - pnlSidebar.Width;
+
             pbLarry.Top = pnlSidebar.Height - (pbLarry.Height + 10);
         }
 
@@ -199,6 +205,20 @@ namespace Twitter
         private void tsmiPreferences_Click(object sender, EventArgs e)
         {
             m_fpPrefForm.ShowDialog();
+        }
+
+        protected void UpdateScrollBar()
+        {
+            if (tmlTimeline.Height > this.ClientSize.Height)
+            {
+                int iLargeChange = (int)(((float)this.ClientSize.Height / (float)tmlTimeline.Height) * 100.0f);
+                tsbTimelineScroller.LargeChange = iLargeChange;
+                //tsbTimelineScroller.Visible = true;
+            }
+            else
+            {
+                //tsbTimelineScroller.Visible = false;
+            }
         }
     }
 }

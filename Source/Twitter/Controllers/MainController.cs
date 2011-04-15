@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Twitter.API;
 using Twitter.API.Basic;
 
 namespace Twitter
@@ -75,6 +76,12 @@ namespace Twitter
         protected AccountList Accounts
         {
             get { return m_aclAccounts; }
+        }
+
+        protected void CallbackCheckSucceeded(string sMessage, string sTitle, APICallbackArgs acArgs)
+        {
+            if (!acArgs.Succeeded)
+                MessageBox.Show(sMessage + "\n\nTwitter said: \"" + acArgs.ErrorMessage + "\"", sTitle, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
     }
 }
