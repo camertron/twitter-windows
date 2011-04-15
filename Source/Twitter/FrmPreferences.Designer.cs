@@ -42,7 +42,6 @@
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.thinScrollbar1 = new Twitter.Controls.ThinScrollbar();
             this.tcTabs.SuspendLayout();
             this.tpGeneral.SuspendLayout();
             this.tpAccounts.SuspendLayout();
@@ -203,8 +202,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(500, 276);
-            this.Controls.Add(this.thinScrollbar1);
+            this.ClientSize = new System.Drawing.Size(375, 276);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.tcTabs);
@@ -238,6 +236,5 @@
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.Button btnAdd;
-        private Controls.ThinScrollbar thinScrollbar1;
     }
 }

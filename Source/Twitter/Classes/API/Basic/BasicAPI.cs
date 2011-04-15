@@ -124,7 +124,7 @@ namespace Twitter.API.Basic
                                     int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
         {
             //@TODO: remove this testing code
-            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets.json").Root.ToList());
+            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_single.json").Root.ToList());
             apcCallback(new APICallbackArgs(true, "", utLine));
 
             //we need this in order to talk to the UI

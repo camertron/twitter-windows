@@ -19,13 +19,14 @@ namespace Twitter.Controls
         private int m_iHandleTop = 0;
         private int m_iHandleBottom = 0;
 
-        private SolidBrush m_bshHandleColor;
+        private int m_iDragSpace;
+        private SolidBrush m_sbHandleBrush;
 
         public ThinScrollbar()
         {
             InitializeComponent();
 
-            m_bshHandleColor = new SolidBrush(Color.Black);
+            m_sbHandleBrush = new SolidBrush(Color.Black);
         }
 
         protected override void OnResize(EventArgs e)
@@ -48,19 +49,38 @@ namespace Twitter.Controls
             //this is how tall the scroll handle should be
             int iHandleHeight = this.Height / (m_iMax / m_iLargeChange);
 
-            e.Graphics.FillEllipse(m_bshHandleColor, 0, m_iHandleTop, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
-            e.Graphics.FillEllipse(m_bshHandleColor, 0, m_iHandleBottom - C_CONTROL_WIDTH, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
-            e.Graphics.FillRectangle(m_bshHandleColor, 0, m_iHandleTop + (C_CONTROL_WIDTH / 2), C_CONTROL_WIDTH, (m_iHandleBottom - m_iHandleTop) - C_CONTROL_WIDTH);
+            e.Graphics.FillEllipse(m_sbHandleBrush, 0, m_iHandleTop, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
+            e.Graphics.FillEllipse(m_sbHandleBrush, 0, m_iHandleBottom - C_CONTROL_WIDTH, C_CONTROL_WIDTH, C_CONTROL_WIDTH);
+            e.Graphics.FillRectangle(m_sbHandleBrush, 0, m_iHandleTop + (C_CONTROL_WIDTH / 2), C_CONTROL_WIDTH, (m_iHandleBottom - m_iHandleTop) - C_CONTROL_WIDTH);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            if ((e.Y >= m_iHandleTop) && (e.Y <= m_iHandleBottom))
+                m_iDragSpace = m_iHandleTop - e.Y;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if ((e.X >= m_iHandleTop) && (e.X <= m_iHandleBottom))
-                m_bshHandleColor.Color = Color.Red;
-            else
-                m_bshHandleColor.Color = Color.Black;
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                if ((e.Y >= m_iHandleTop) && (e.Y <= m_iHandleBottom))
+                {
+                    //calculate m_iValue, then invalidate
 
-            this.Invalidate();
+                    //this is the new top of the scroll handle
+                    float fNewTop = e.Y + m_iDragSpace;  //drag space is the space between the top of the handle and where the mouse has grabbed it
+
+                    //this is the percent scrolled the new top represents
+                    float fPercentPos = fNewTop / (this.Height - m_iLargeChange);
+
+                    //this is the new scroll value
+                    int iNewVal = (int)(m_iMax * fPercentPos);
+
+                    if ((iNewVal >= 0) && (iNewVal <= m_iMax))
+                        this.Value = iNewVal;
+                }
+            }
         }
 
         public int Max
@@ -79,6 +99,12 @@ namespace Twitter.Controls
         {
             get { return m_iLargeChange; }
             set { m_iLargeChange = value; this.Invalidate(); }
+        }
+
+        public Color HandleColor
+        {
+            get { return m_sbHandleBrush.Color; }
+            set { m_sbHandleBrush.Color = value; this.Invalidate(); }
         }
     }
 }
