@@ -239,6 +239,7 @@
             this.tmlTimeline.BackColor = System.Drawing.Color.White;
             this.tmlTimeline.Location = new System.Drawing.Point(67, 0);
             this.tmlTimeline.Name = "tmlTimeline";
+            this.tmlTimeline.ScrolledToTop = false;
             this.tmlTimeline.Size = new System.Drawing.Size(459, 0);
             this.tmlTimeline.TabIndex = 3;
             // 
@@ -264,6 +265,7 @@
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tmlTimeline);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

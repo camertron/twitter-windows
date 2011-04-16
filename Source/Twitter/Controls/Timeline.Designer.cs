@@ -29,12 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.tmrPushTweet = new System.Windows.Forms.Timer(this.components);
+            this.tmrTweetAnimate = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
-            // tmrPushTweet
+            // tmrTweetAnimate
             // 
-            this.tmrPushTweet.Interval = 500;
+            this.tmrTweetAnimate.Interval = 1;
+            this.tmrTweetAnimate.Tick += new System.EventHandler(this.tmrTweetAnimate_Tick);
             // 
             // Timeline
             // 
@@ -48,6 +49,6 @@
 
         #endregion
 
-        private System.Windows.Forms.Timer tmrPushTweet;
+        private System.Windows.Forms.Timer tmrTweetAnimate;
     }
 }

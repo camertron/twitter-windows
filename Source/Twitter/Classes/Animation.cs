@@ -33,6 +33,10 @@ namespace Twitter
 
             m_fRise = ptEnd.Y - ptStart.Y;
             m_fRun = ptEnd.X - ptStart.X;
+
+            if (m_fRun == 0.0f)
+                m_fRun = 1;
+
             m_fSlope = m_fRise / m_fRun;
             m_fYIntercept = ptStart.Y - (int)(m_fSlope * ptStart.X);
         }
@@ -55,17 +59,22 @@ namespace Twitter
 
                 //ease in/out both map the percent progress to a parabolic percentage (x^2) between 0 and 1 inclusive
                 case MotionType.EaseOut:
-                    fPercentProgress = (float)Math.Pow((float)iElapsed / (float)m_iDuration, 2);
+                    fPercentProgress = (float)Math.Pow((float)iElapsed / (float)m_iDuration, 5);
                     break;
                 case MotionType.EaseIn:
-                    fPercentProgress = -(float)Math.Pow((float)iElapsed / (float)m_iDuration, 2) + 1;
+                    fPercentProgress = ((float)Math.Pow((float)iElapsed / (float)m_iDuration, (1.0f / 4.0f)));
                     break;
             }
 
             float fX = m_fRun * fPercentProgress;
             float fY = (m_fSlope * fX) + m_fYIntercept;
-            Point ptFinal = new Point(m_ptStart.X + (int)fX, m_ptStart.Y + (int)fY);
+            Point ptFinal = new Point((int)fX, (int)fY);
             return ptFinal;
+        }
+
+        public int Duration
+        {
+            get { return m_iDuration; }
         }
     }
 }

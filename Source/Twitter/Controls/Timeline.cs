@@ -23,6 +23,9 @@ namespace Twitter.Controls
 
         private Stack<TimelineStatus> m_stsControls;
         private int m_iTotalControlHeight = 0;
+        private bool m_bScrolledToTop = true;  //whether or not the user has scrolled to the top of the timeline
+        private LinearMotionAnimation m_lmaMotion = null;
+        private int m_iAnimateTimeElapsed = 0;
 
         public Timeline()
         {
@@ -34,15 +37,29 @@ namespace Twitter.Controls
         public void Push(Status stToAdd)
         {
             TimelineStatus tsNewStatus = new TimelineStatus(stToAdd);
+            TimelineStatus tsOldTop = null;
 
-            m_stsControls.Push(tsNewStatus);
+            if (m_stsControls.Count > 0)
+                tsOldTop = m_stsControls.Peek();
+
             this.Controls.Add(tsNewStatus);
-            tsNewStatus.Width = this.Width;
+            m_stsControls.Push(tsNewStatus);
             tsNewStatus.UpdateLayout();
             tsNewStatus.BackColor = this.BackColor;
-            tsNewStatus.Visible = true;
             HookupEvents(tsNewStatus);
 
+            OnResize(EventArgs.Empty);
+            m_iTotalControlHeight += tsNewStatus.Height;
+
+            if (m_bScrolledToTop)
+            {
+                if (tsOldTop != null)
+                    tsNewStatus.Top = tsOldTop.Top - tsNewStatus.Height;
+                else
+                    tsNewStatus.Top = -(tsNewStatus.Height);
+            }
+
+            tsNewStatus.Visible = true;
             UpdateLayout();
         }
 
@@ -90,27 +107,17 @@ namespace Twitter.Controls
         {
             if (StatusTextClicked != null)
                 StatusTextClicked(this, ((TimelineStatus)sender).StatusObj, tstElement);
-        }   
+        }
 
         //returns final control height
         public void UpdateLayout()
         {
-            if (m_stsControls != null)
+            if ((m_stsControls != null) && (m_bScrolledToTop))
             {
-                Stack<TimelineStatus>.Enumerator stsEnum = m_stsControls.GetEnumerator();
-                int iY = 0;
-
-                while (stsEnum.MoveNext())
-                {
-                    stsEnum.Current.Top = iY;
-                    stsEnum.Current.Width = this.Width;
-                    stsEnum.Current.Left = 0;
-                    stsEnum.Current.Invalidate();
-                    iY += stsEnum.Current.Height;
-                }
-
-                m_iTotalControlHeight = iY;
-                this.Height = iY;
+                TimelineStatus tsTop = m_stsControls.Peek();
+                m_lmaMotion = new LinearMotionAnimation(new Point(0, tsTop.Top), new Point(0, 0), 40, LinearMotionAnimation.MotionType.EaseIn);
+                m_iAnimateTimeElapsed = 0;
+                tmrTweetAnimate.Enabled = true;
             }
         }
 
@@ -118,6 +125,48 @@ namespace Twitter.Controls
         {
             //don't change the height - UpdateLayout will do that every time a tweet is added/removed
             this.Height = m_iTotalControlHeight;
+
+            if (m_stsControls != null)
+            {
+                Stack<TimelineStatus>.Enumerator stsEnum = m_stsControls.GetEnumerator();
+
+                while (stsEnum.MoveNext())
+                    stsEnum.Current.Width = this.Width;
+            }
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Always)]
+        public bool ScrolledToTop
+        {
+            get { return m_bScrolledToTop; }
+            set { m_bScrolledToTop = value; }
+        }
+
+        private void tmrTweetAnimate_Tick(object sender, EventArgs e)
+        {
+            if (m_lmaMotion != null)
+            {
+                Stack<TimelineStatus>.Enumerator stsEnum = m_stsControls.GetEnumerator();
+                TimelineStatus tsPrev = null;
+  
+                stsEnum.MoveNext();
+                tsPrev = stsEnum.Current;
+                stsEnum.Current.Top = m_lmaMotion.PositionForTime(m_iAnimateTimeElapsed).Y;
+
+                while (stsEnum.MoveNext())
+                {
+                    stsEnum.Current.Top = tsPrev.Bottom;
+                    stsEnum.Current.Width = this.Width;
+                    stsEnum.Current.Left = 0;
+                    stsEnum.Current.Invalidate();
+                    tsPrev = stsEnum.Current;
+                }
+            }
+
+            m_iAnimateTimeElapsed ++;
+
+            if (m_iAnimateTimeElapsed > m_lmaMotion.Duration)
+                tmrTweetAnimate.Enabled = false;
         }
     }
 }

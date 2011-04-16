@@ -19,13 +19,6 @@ namespace Twitter
             InitializeComponent();
 
             this.FormClosing += new FormClosingEventHandler(FrmPreferences_FormClosing);
-
-            LinearMotionAnimation lma = new LinearMotionAnimation(new Point(0, 0), new Point(5, 5), 10, LinearMotionAnimation.MotionType.EaseIn);
-            Point pt = lma.PositionForTime(2);
-            pt = lma.PositionForTime(4);
-            pt = lma.PositionForTime(6);
-            pt = lma.PositionForTime(8);
-            pt = lma.PositionForTime(10);
         }
 
         private void FrmPreferences_FormClosing(object sender, FormClosingEventArgs e)

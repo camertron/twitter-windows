@@ -35,8 +35,8 @@ namespace Twitter
         {
             m_usUserStream.Connect();
 
-            Thread thdLookup = new Thread(new ThreadStart(LookupUser));
-            thdLookup.Start();
+            //Thread thdLookup = new Thread(new ThreadStart(LookupUser));
+            //thdLookup.Start();
         }
 
         private void LookupUser()

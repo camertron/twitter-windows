@@ -40,6 +40,7 @@ namespace Twitter
 
             m_ftTweetForm.TweetClicked += new FrmTweet.TweetClickedEventHandler(m_ftTweetForm_TweetClicked);
             tsbTimelineScroller.Scroll += new ScrollEventHandler(tsbTimelineScroller_Scroll);
+            tmlTimeline.ScrolledToTop = true;
 
             //@TODO: do this for testing purposes only
             //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
@@ -47,10 +48,25 @@ namespace Twitter
                 //tmlTimeline.Push(utLine.Statuses[i]);
         }
 
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            int iNewTop = tmlTimeline.Top + (e.Delta / (SystemInformation.MouseWheelScrollDelta / 20));
+
+            if (iNewTop > 0)
+                tmlTimeline.Top = 0;
+            else if (iNewTop < (this.ClientSize.Height - tmlTimeline.Height))
+                tmlTimeline.Top = this.ClientSize.Height - tmlTimeline.Height;
+            else
+                tmlTimeline.Top = iNewTop;
+
+            UpdateScrollBar();
+        }
+
         private void tsbTimelineScroller_Scroll(object sender, ScrollEventArgs e)
         {
             float fPercentScrolled = (float)e.NewValue / 100.0f;
             tmlTimeline.Top = -(int)((tmlTimeline.Height - this.ClientSize.Height) * fPercentScrolled);
+            tmlTimeline.ScrolledToTop = (e.Type == ScrollEventType.First);
         }
 
         private void tmlTimeline_ReplyClicked(object sender, TimelineStatus tsControl, Status stStatus)
@@ -146,7 +162,7 @@ namespace Twitter
 
             //note: tmlTimeline's height is automatically set based on the number of tweets it contains
             tmlTimeline.Left = pnlSidebar.Right;
-            UpdateScrollBar();  // this has to be called before tmlTimeline's width is set because it hides/shows the scroller
+            UpdateScrollBar();
             
             if (tsbTimelineScroller.Visible)
                 tmlTimeline.Width = this.ClientSize.Width - (pnlSidebar.Width + tsbTimelineScroller.Width);
@@ -225,6 +241,10 @@ namespace Twitter
             {
                 int iLargeChange = (int)(((float)this.ClientSize.Height / (float)tmlTimeline.Height) * 100.0f);
                 tsbTimelineScroller.LargeChange = iLargeChange;
+
+                float fPercent = Math.Abs((float)tmlTimeline.Top) / (float)(tmlTimeline.Height - this.ClientSize.Height);
+                tsbTimelineScroller.Value = (int)(tsbTimelineScroller.Max * fPercent);
+
                 tsbTimelineScroller.Visible = true;
             }
             else
