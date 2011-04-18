@@ -53,11 +53,20 @@ namespace Twitter
             int iNewTop = tmlTimeline.Top + (e.Delta / (SystemInformation.MouseWheelScrollDelta / 20));
 
             if (iNewTop > 0)
+            {
                 tmlTimeline.Top = 0;
+                tmlTimeline.ScrolledToTop = true;
+            }
             else if (iNewTop < (this.ClientSize.Height - tmlTimeline.Height))
+            {
                 tmlTimeline.Top = this.ClientSize.Height - tmlTimeline.Height;
+                tmlTimeline.ScrolledToTop = false;
+            }
             else
+            {
                 tmlTimeline.Top = iNewTop;
+                tmlTimeline.ScrolledToTop = false;
+            }
 
             UpdateScrollBar();
         }
@@ -121,7 +130,7 @@ namespace Twitter
 
         #endregion
 
-        #region Streaming Events
+        #region View Events
 
         protected override void OnTweetReceived(Status stReceived)
         {
@@ -131,6 +140,12 @@ namespace Twitter
 
         protected override void OnDirectMessageReceived(DirectMessage dmReceived)
         {
+        }
+
+        protected override void OnAccountSetAvatar(int iAccountIndex, Bitmap bmpAvatar)
+        {
+            //eventually this function will use iAccountIndex to set the right avatar
+            pbAvatar.Image = bmpAvatar;
         }
 
         #endregion

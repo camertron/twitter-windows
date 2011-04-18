@@ -4,15 +4,17 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Drawing;
+using System.Threading;
 using Twitter.API;
 using Twitter.API.Streaming;
 using Twitter.API.Basic;
-using System.Threading;
 
 namespace Twitter
 {
     public class Account
     {
+        public event EventHandler UserObjectReceived;
+
         private UserStream m_usUserStream = null;
         private StreamingAPI m_sAPI;
         private BasicAPI m_bAPI;
@@ -35,18 +37,26 @@ namespace Twitter
         {
             m_usUserStream.Connect();
 
-            //Thread thdLookup = new Thread(new ThreadStart(LookupUser));
-            //thdLookup.Start();
+            Thread thUserObj = new Thread(new ThreadStart(GetUserObject));
+            thUserObj.Start();
         }
 
-        private void LookupUser()
+        private void GetUserObject()
         {
-            m_bAPI.LookupUser(UserLookupCallback, null, new List<string>(new string[] { m_bAPI.Credentials.ClientUsername }));
+            m_bAPI.LookupUser(GetUserObjectCallback, null, new List<string>(new string[] { m_bAPI.Credentials.ClientUsername }));
         }
 
-        private void UserLookupCallback(APICallbackArgs acArgs)
+        private void GetUserObjectCallback(APICallbackArgs acArgs)
         {
-            m_uUserObject = (User)acArgs.ResponseObject;
+            List<User> luResponseList = (List<User>)acArgs.ResponseObject;
+
+            if (luResponseList.Count > 0)
+            {
+                m_uUserObject = luResponseList[0];
+
+                if (UserObjectReceived != null)
+                    APIReturn.SynchronizeInvoke(UserObjectReceived, this, EventArgs.Empty);
+            }
         }
 
         public User UserObject
@@ -92,6 +102,7 @@ namespace Twitter
         public event EventHandler AccountSwitched;
         public event AccountHandler AccountAdded;
         public event AccountHandler AccountRemoved;
+        public event AccountHandler UserObjectReceived;
 
         private const int C_NULL_ACCOUNT_INDEX = -1;
         private int m_iActiveAccountIndex = C_NULL_ACCOUNT_INDEX;
@@ -102,6 +113,7 @@ namespace Twitter
         {
             Account actNew = new Account(sAccessToken, sAccessSecret, sUsername, sPassword);
             base.Add(actNew);
+            HookupNewAccount(actNew);
 
             //if there weren't any accounts in here before, set the newly created account as the active account
             if (base.Count == 1)
@@ -114,15 +126,36 @@ namespace Twitter
         public new void Add(Account actNew)
         {
             base.Add(actNew);
+            HookupNewAccount(actNew);
 
             if (AccountAdded != null)
                 AccountAdded(this, actNew);
         }
 
+        //use this function to add events to each account
+        private void HookupNewAccount(Account actNew)
+        {
+            actNew.UserObjectReceived += new EventHandler(Account_UserObjectReceived);
+        }
+
+        //use this function to remove events from each account
+        private void UnhookAccount(Account actNew)
+        {
+            actNew.UserObjectReceived -= new EventHandler(Account_UserObjectReceived);
+        }
+
+        private void Account_UserObjectReceived(object sender, EventArgs e)
+        {
+            if (UserObjectReceived != null)
+                UserObjectReceived(this, (Account)sender);
+        }
+
         public new void RemoveAt(int iIndex)
         {
             Account actReturn = base[iIndex];
+
             base.RemoveAt(iIndex);
+            UnhookAccount(actReturn);
 
             if (AccountRemoved != null)
                 AccountRemoved(this, actReturn);
@@ -131,7 +164,9 @@ namespace Twitter
         public new void Remove(Account actToRemove)
         {
             Account actReturn = base[base.IndexOf(actToRemove)];
+
             base.Remove(actToRemove);
+            UnhookAccount(actToRemove);
 
             if (AccountRemoved != null)
                 AccountRemoved(this, actReturn);

@@ -23,7 +23,7 @@ namespace Twitter
         private Dictionary<string, AsyncContent> m_dctCache;
         private int m_iCacheLimit;
 
-        public delegate void RequestImageCallbackHandler(object sender, Bitmap bmpImage);
+        public delegate void RequestImageCallbackHandler(object sender, Bitmap bmpImage, object objContext);
 
         private AsyncContentManager()
         {
@@ -47,14 +47,14 @@ namespace Twitter
             return c_acmInstance;
         }
 
-        public void RequestImage(string sUrl, RequestImageCallbackHandler richCallback)
+        public void RequestImage(string sUrl, RequestImageCallbackHandler richCallback, object objContext = null)
         {
             if (m_dctCache.ContainsKey(sUrl))
             {
                 if (m_dctCache[sUrl].Result == null)
-                    m_dctCache[sUrl].Callbacks.Add(richCallback);
+                    m_dctCache[sUrl].Callbacks.Add(new AsyncContentCallback(richCallback, null));
                 else
-                    richCallback(this, (Bitmap)m_dctCache[sUrl].Result);
+                    richCallback(this, (Bitmap)m_dctCache[sUrl].Result, objContext);
             }
             else
             {
@@ -65,7 +65,7 @@ namespace Twitter
                     HitCount = 1
                 };
 
-                acCur.Callbacks.Add(richCallback);
+                acCur.Callbacks.Add(new AsyncContentCallback(richCallback, objContext));
                 m_qWorkQueue.Enqueue(acCur);
                 m_dctCache.Add(sUrl, acCur);
 
@@ -145,7 +145,7 @@ namespace Twitter
             //bmpImage.Save("C:/Users/le grand fromage/Desktop/avatars/" + Path.GetFileName(acImage.Url));
 
             for (int i = 0; i < acImage.Callbacks.Count; i ++)
-                acImage.Callbacks[i].DynamicInvoke(this, bmpImage);
+                acImage.Callbacks[i].Callback.DynamicInvoke(this, bmpImage, acImage.Callbacks[i].Context);
 
             acImage.Result = bmpImage;
         }
@@ -180,14 +180,14 @@ namespace Twitter
         }
 
         private ContentType m_ctType;
-        private List<Delegate> m_ldgCallbacks;
+        private List<AsyncContentCallback> m_lacCallbacks;
         private string m_sUrl;
         private object m_objResult;
         private int m_iHitCount;
 
         public AsyncContent()
         {
-            m_ldgCallbacks = new List<Delegate>();
+            m_lacCallbacks = new List<AsyncContentCallback>();
         }
 
         public ContentType Type
@@ -196,10 +196,10 @@ namespace Twitter
             set { m_ctType = value; }
         }
 
-        public List<Delegate> Callbacks
+        public List<AsyncContentCallback> Callbacks
         {
-            get { return m_ldgCallbacks; }
-            set { m_ldgCallbacks = value; }
+            get { return m_lacCallbacks; }
+            set { m_lacCallbacks = value; }
         }
 
         public string Url
@@ -218,6 +218,28 @@ namespace Twitter
         {
             get { return m_iHitCount; }
             set { m_iHitCount = value; }
+        }
+    }
+
+    public class AsyncContentCallback
+    {
+        private Delegate m_dgCallback;
+        private object m_objContext;
+
+        public AsyncContentCallback(Delegate dgInitCallback, object objInitContext)
+        {
+            m_dgCallback = dgInitCallback;
+            m_objContext = objInitContext;
+        }
+
+        public Delegate Callback
+        {
+            get { return m_dgCallback; }
+        }
+
+        public object Context
+        {
+            get { return m_objContext; }
         }
     }
 }

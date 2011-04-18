@@ -105,7 +105,7 @@ namespace Twitter.Controls
                 TextElementClicked(this, tstElement);
         }
 
-        private void AvatarCallback(object sender, Bitmap bmpAvatar)
+        private void AvatarCallback(object sender, Bitmap bmpAvatar, object objContext)
         {
             //for some reason, a few of the avatars are weird sizes (I'm looking at you, TechCrunch)
             //this code resizes the avatar before its displayed so nothing overlaps and looks weird

@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.pnlSidebar = new System.Windows.Forms.Panel();
             this.pbLarry = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pbAvatar = new System.Windows.Forms.PictureBox();
             this.sbbSearch = new Twitter.Controls.SidebarButton();
             this.sbbPeople = new Twitter.Controls.SidebarButton();
             this.sbbLists = new Twitter.Controls.SidebarButton();
@@ -51,7 +51,7 @@
             this.tsbTimelineScroller = new Twitter.Controls.ThinScrollbar();
             this.pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLarry)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).BeginInit();
             this.cmsLarry.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,7 +59,7 @@
             // 
             this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
             this.pnlSidebar.Controls.Add(this.pbLarry);
-            this.pnlSidebar.Controls.Add(this.pictureBox1);
+            this.pnlSidebar.Controls.Add(this.pbAvatar);
             this.pnlSidebar.Controls.Add(this.sbbSearch);
             this.pnlSidebar.Controls.Add(this.sbbPeople);
             this.pnlSidebar.Controls.Add(this.sbbLists);
@@ -82,13 +82,13 @@
             this.pbLarry.TabStop = false;
             this.pbLarry.Click += new System.EventHandler(this.pbLarry_Click);
             // 
-            // pictureBox1
+            // pbAvatar
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(11, 10);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(47, 46);
-            this.pictureBox1.TabIndex = 6;
-            this.pictureBox1.TabStop = false;
+            this.pbAvatar.Location = new System.Drawing.Point(11, 10);
+            this.pbAvatar.Name = "pbAvatar";
+            this.pbAvatar.Size = new System.Drawing.Size(47, 46);
+            this.pbAvatar.TabIndex = 6;
+            this.pbAvatar.TabStop = false;
             // 
             // sbbSearch
             // 
@@ -265,7 +265,6 @@
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tmlTimeline);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -273,7 +272,7 @@
             this.pnlSidebar.ResumeLayout(false);
             this.pnlSidebar.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLarry)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).EndInit();
             this.cmsLarry.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -289,7 +288,7 @@
         private Controls.SidebarButton sbbLists;
         private Controls.SidebarButton sbbPeople;
         private Controls.SidebarButton sbbSearch;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pbAvatar;
         private System.Windows.Forms.PictureBox pbLarry;
         private System.Windows.Forms.ContextMenuStrip cmsLarry;
         private System.Windows.Forms.ToolStripMenuItem tsmiNewTweet;

@@ -234,7 +234,7 @@ namespace Twitter.API
             APIReturn.SynchronizeInvoke(m_apcCallback, oaArgs);
         }
 
-        public static void SynchronizeInvoke(Delegate dlHandler, object[] oaArgs)
+        public static void SynchronizeInvoke(Delegate dlHandler, params object[] oaArgs)
         {
             foreach (Delegate dlReceiver in dlHandler.GetInvocationList())
             {

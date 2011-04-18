@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 using Twitter.API;
 using Twitter.API.Basic;
 
@@ -21,6 +22,7 @@ namespace Twitter
             m_aclAccounts.AccountSwitched += new EventHandler(m_aclAccounts_AccountSwitched);
             m_aclAccounts.AccountAdded += new AccountList.AccountHandler(m_aclAccounts_AccountAdded);
             m_aclAccounts.AccountRemoved += new AccountList.AccountHandler(m_aclAccounts_AccountRemoved);
+            m_aclAccounts.UserObjectReceived += new AccountList.AccountHandler(m_aclAccounts_UserObjectReceived);
 
             m_aclAccounts.LoadFromFile(Literals.C_ACCOUNT_FILE);
 
@@ -35,6 +37,16 @@ namespace Twitter
         }
 
         #region Local Events
+
+        private void m_aclAccounts_UserObjectReceived(object sender, Account actSubject)
+        {
+            AsyncContentManager.GetManager().RequestImage(actSubject.UserObject["profile_image_url"].ToString(), AccountGetAvatarCallback, actSubject);
+        }
+
+        private void AccountGetAvatarCallback(object sender, Bitmap bmpImage, object objContext)
+        {
+            OnAccountSetAvatar(m_aclAccounts.IndexOf((Account)objContext), Imaging.RoundAvatarCorners(bmpImage));
+        }
 
         private void m_aclAccounts_AccountSwitched(object sender, EventArgs e) { OnAccountSwitched(); }
 
@@ -77,6 +89,7 @@ namespace Twitter
         #region Event-based view functions
 
         protected virtual void OnAccountSwitched() { }
+        protected virtual void OnAccountSetAvatar(int iAccountIndex, Bitmap bmpAvatar) { }
         protected virtual void OnTweetReceived(Status stReceived) { }
         protected virtual void OnDirectMessageReceived(DirectMessage dmReceived) { }
 
