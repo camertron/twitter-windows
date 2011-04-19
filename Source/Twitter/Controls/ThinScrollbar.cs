@@ -11,7 +11,7 @@ namespace Twitter.Controls
 {
     public partial class ThinScrollbar : UserControl
     {
-        public event ScrollEventHandler Scroll;
+        public new event ScrollEventHandler Scroll;
 
         private const int C_CONTROL_WIDTH = 6;
         private const int C_LARGE_CHANGE_DEFAULT = 10;

@@ -46,7 +46,7 @@ namespace Twitter.Controls
             m_stsControls.Push(tsNewStatus);
             tsNewStatus.UpdateLayout();
             tsNewStatus.BackColor = this.BackColor;
-            HookupEvents(tsNewStatus);
+            HookupStatusEvents(tsNewStatus);
 
             OnResize(EventArgs.Empty);
             m_iTotalControlHeight += tsNewStatus.Height;
@@ -63,7 +63,7 @@ namespace Twitter.Controls
             UpdateLayout();
         }
 
-        private void HookupEvents(TimelineStatus tsNewStatus)
+        private void HookupStatusEvents(TimelineStatus tsNewStatus)
         {
             tsNewStatus.TextElementClicked += new TweetTextField.TextElementClickHandler(this.Status_TextElementClicked);
             tsNewStatus.RetweetClicked += new EventHandler(Status_RetweetClick);
@@ -144,7 +144,9 @@ namespace Twitter.Controls
 
         private void tmrTweetAnimate_Tick(object sender, EventArgs e)
         {
-            if (m_lmaMotion != null)
+            if (m_lmaMotion == null)
+                tmrTweetAnimate.Enabled = false;
+            else
             {
                 Stack<TimelineStatus>.Enumerator stsEnum = m_stsControls.GetEnumerator();
                 TimelineStatus tsPrev = null;

@@ -60,7 +60,7 @@ namespace Twitter
             actSubject.UserStream.Receive += new API.Streaming.UserStream.ReceiveHandler(Account_UserStream_Receive);
         }
 
-        private void Account_UserStream_Receive(object sender, API.Json.JsonDocument jdData)
+        protected void Account_UserStream_Receive(object sender, API.Json.JsonDocument jdData)
         {
             if (jdData.Root.IsNode())
             {
@@ -71,15 +71,21 @@ namespace Twitter
                 else if (jdData.Root.ToNode().ContainsKey("retweeted"))
                 {
                     //it's a tweet!
+                    string sTweetText = jdData.Root.ToNode()["text"].ToString();
+
                     Status stNewStatus = new Status(jdData.Root.ToNode());
+                    //m_aclAccounts.ActiveAccount.Statuses.Add(stNewStatus);
+
                     OnTweetReceived(stNewStatus);
-                    m_aclAccounts.ActiveAccount.Statuses.Add(stNewStatus);
+
+                    if ((sTweetText.Length > 0) && (sTweetText[0] == '@'))
+                        OnReplyReceived(stNewStatus);
                 }
                 else if (jdData.Root.ToNode().ContainsKey("recipient_id") && jdData.Root.ToNode().ContainsKey("sender_id"))
                 {
                     DirectMessage dmNewMessage = new DirectMessage(jdData.Root.ToNode());
-                    OnDirectMessageReceived(dmNewMessage);
                     m_aclAccounts.ActiveAccount.DirectMessages.Add(dmNewMessage);
+                    OnDirectMessageReceived(dmNewMessage);
                 }
             }
         }
@@ -92,6 +98,7 @@ namespace Twitter
         protected virtual void OnAccountSetAvatar(int iAccountIndex, Bitmap bmpAvatar) { }
         protected virtual void OnTweetReceived(Status stReceived) { }
         protected virtual void OnDirectMessageReceived(DirectMessage dmReceived) { }
+        protected virtual void OnReplyReceived(Status stReceived) { }
 
         #endregion
 

@@ -16,9 +16,22 @@ namespace Twitter
     [System.ComponentModel.DesignerCategory("Form")]
     public partial class FrmMain : MainController
     {
+        private enum SidebarButtonEnum
+        {
+            Timeline = 1,
+            Replies = 2,
+            DirectMessages = 3,
+            Lists = 4,
+            People = 5,
+            Search = 6
+        }
+
         private SidebarButton m_sbbSelected;
+        private SidebarButtonEnum m_sbeSelected;
         private FrmTweet m_ftTweetForm;
         private FrmPreferences m_fpPrefForm;
+        private int m_iTimelineChangeElapsed = 0;
+        private LinearMotionAnimation m_lmaTimelineChangeAnim = null;
 
         public FrmMain()
         {
@@ -45,6 +58,7 @@ namespace Twitter
             //@TODO: do this for testing purposes only
             //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
             //for (int i = 0; i < utLine.Statuses.Count; i++)
+                //Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object));
                 //tmlTimeline.Push(utLine.Statuses[i]);
         }
 
@@ -148,6 +162,11 @@ namespace Twitter
             pbAvatar.Image = bmpAvatar;
         }
 
+        protected override void OnReplyReceived(Status stReceived)
+        {
+            tmlReplyTimeline.Push(stReceived);
+        }
+
         #endregion
 
         private void tmlTimeline_StatusTextClicked(object sender, Status stStatus, TweetTextElement tstElement)
@@ -193,6 +212,8 @@ namespace Twitter
             m_sbbSelected.Selected = false;
             sbbTimeline.Selected = true;
             m_sbbSelected = sbbTimeline;
+            m_sbeSelected = SidebarButtonEnum.Timeline;
+            SidebarChanged();
         }
 
         private void sbbReplies_Click(object sender, EventArgs e)
@@ -200,6 +221,8 @@ namespace Twitter
             m_sbbSelected.Selected = false;
             sbbReplies.Selected = true;
             m_sbbSelected = sbbReplies;
+            m_sbeSelected = SidebarButtonEnum.Replies;
+            SidebarChanged();
         }
 
         private void sbbMessages_Click(object sender, EventArgs e)
@@ -207,6 +230,8 @@ namespace Twitter
             m_sbbSelected.Selected = false;
             sbbMessages.Selected = true;
             m_sbbSelected = sbbMessages;
+            m_sbeSelected = SidebarButtonEnum.DirectMessages;
+            SidebarChanged();
         }
 
         private void sbbLists_Click(object sender, EventArgs e)
@@ -214,6 +239,7 @@ namespace Twitter
             m_sbbSelected.Selected = false;
             sbbLists.Selected = true;
             m_sbbSelected = sbbLists;
+            SidebarChanged();
         }
 
         private void sbbPeople_Click(object sender, EventArgs e)
@@ -221,6 +247,8 @@ namespace Twitter
             m_sbbSelected.Selected = false;
             sbbPeople.Selected = true;
             m_sbbSelected = sbbPeople;
+            m_sbeSelected = SidebarButtonEnum.People;
+            SidebarChanged();
         }
 
         private void sbbSearch_Click(object sender, EventArgs e)
@@ -228,6 +256,31 @@ namespace Twitter
             m_sbbSelected.Selected = false;
             sbbSearch.Selected = true;
             m_sbbSelected = sbbSearch;
+            m_sbeSelected = SidebarButtonEnum.Search;
+            SidebarChanged();
+        }
+
+        private void SidebarChanged()
+        {
+            Timeline tmlCur = TimelineForSelectedSidebarButton();
+
+            tmlCur.Left = this.ClientSize.Width;
+            m_iTimelineChangeElapsed = 0;
+            m_lmaTimelineChangeAnim = new LinearMotionAnimation(new Point(this.ClientSize.Width, 0), new Point(pnlSidebar.Right, 0), 20, LinearMotionAnimation.MotionType.EaseIn);
+            tmrTimelineChange.Enabled = true;
+        }
+
+        private Timeline TimelineForSelectedSidebarButton()
+        {
+            switch (m_sbeSelected)
+            {
+                case SidebarButtonEnum.Timeline:
+                    return tmlTimeline;
+                case SidebarButtonEnum.Replies:
+                    return tmlReplyTimeline;
+                default:
+                    return null;
+            }
         }
 
         private void pbLarry_Click(object sender, EventArgs e)
@@ -266,6 +319,22 @@ namespace Twitter
             {
                 tsbTimelineScroller.Visible = false;
             }
+        }
+
+        private void tmrTimelineChange_Tick(object sender, EventArgs e)
+        {
+            Timeline tmlCur = TimelineForSelectedSidebarButton();
+
+            if (m_lmaTimelineChangeAnim == null)
+                tmrTimelineChange.Enabled = false;
+            else
+            {
+                tmlCur.Left = m_lmaTimelineChangeAnim.PositionForTime(m_iTimelineChangeElapsed).X;
+                m_iTimelineChangeElapsed++;
+            }
+
+            if (m_iTimelineChangeElapsed >= m_lmaTimelineChangeAnim.Duration)
+                tmrTimelineChange.Enabled = false;
         }
     }
 }

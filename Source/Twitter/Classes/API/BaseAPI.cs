@@ -229,7 +229,7 @@ namespace Twitter.API
             get { return m_objCallbackArg; }
         }
 
-        public void SynchronizeInvoke(object[] oaArgs)
+        public void SynchronizeInvoke(params object[] oaArgs)
         {
             APIReturn.SynchronizeInvoke(m_apcCallback, oaArgs);
         }

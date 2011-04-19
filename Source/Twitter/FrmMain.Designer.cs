@@ -49,6 +49,8 @@
             this.tsmiPreferences = new System.Windows.Forms.ToolStripMenuItem();
             this.tmlTimeline = new Twitter.Controls.Timeline();
             this.tsbTimelineScroller = new Twitter.Controls.ThinScrollbar();
+            this.tmlReplyTimeline = new Twitter.Controls.Timeline();
+            this.tmrTimelineChange = new System.Windows.Forms.Timer(this.components);
             this.pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLarry)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).BeginInit();
@@ -255,12 +257,27 @@
             this.tsbTimelineScroller.TabIndex = 6;
             this.tsbTimelineScroller.Value = 0;
             // 
+            // tmlReplyTimeline
+            // 
+            this.tmlReplyTimeline.Location = new System.Drawing.Point(93, 39);
+            this.tmlReplyTimeline.Name = "tmlReplyTimeline";
+            this.tmlReplyTimeline.ScrolledToTop = true;
+            this.tmlReplyTimeline.Size = new System.Drawing.Size(75, 0);
+            this.tmlReplyTimeline.TabIndex = 7;
+            this.tmlReplyTimeline.Visible = false;
+            // 
+            // tmrTimelineChange
+            // 
+            this.tmrTimelineChange.Interval = 1;
+            this.tmrTimelineChange.Tick += new System.EventHandler(this.tmrTimelineChange_Tick);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(538, 675);
+            this.Controls.Add(this.tmlReplyTimeline);
             this.Controls.Add(this.tsbTimelineScroller);
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tmlTimeline);
@@ -299,6 +316,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem tsmiPreferences;
         private Controls.ThinScrollbar tsbTimelineScroller;
+        private Controls.Timeline tmlReplyTimeline;
+        private System.Windows.Forms.Timer tmrTimelineChange;
 
     }
 }

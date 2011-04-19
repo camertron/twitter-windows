@@ -91,25 +91,8 @@ namespace Twitter.API.Streaming
                 sCurLine = srReader.ReadLine().Trim();
             } while ((sCurLine == "") && (! srReader.EndOfStream));
 
-            foreach (Delegate dlReceiver in Receive.GetInvocationList())
-            {
-                ISynchronizeInvoke isSyncInvoke = dlReceiver.Target as ISynchronizeInvoke;
-
-                try
-                {
-                    //StreamWriter swWriter = new StreamWriter("C:/Users/le grand fromage/Desktop/tweetdump.json", true);
-                    //swWriter.WriteLine(sCurLine);
-                    //swWriter.Close();
-
-                    JsonDocument jdFinal = JsonParser.GetParser().ParseString(sCurLine);
-
-                    if (isSyncInvoke != null && isSyncInvoke.InvokeRequired)
-                        isSyncInvoke.Invoke(Receive, new object[] { this, jdFinal });
-                    else
-                        dlReceiver.DynamicInvoke(new object[] { this, jdFinal });
-                }
-                catch(Exception e) {}
-            }
+            JsonDocument jdFinal = JsonParser.GetParser().ParseString(sCurLine);
+            APIReturn.SynchronizeInvoke(Receive, this, jdFinal);
         }
 
         public void Disconnect()

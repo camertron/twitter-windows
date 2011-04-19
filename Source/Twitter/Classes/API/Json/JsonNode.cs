@@ -54,6 +54,11 @@ namespace Twitter.API.Json
             return m_objInternalObject.GetType() == typeof(JsonNode);
         }
 
+        public bool IsBool()
+        {
+            return m_objInternalObject.GetType() == typeof(Boolean);
+        }
+
         public JsonNode ToNode()
         {
             return (JsonNode)m_objInternalObject;
@@ -74,6 +79,16 @@ namespace Twitter.API.Json
         public override string ToString()
         {
             return (string)m_objInternalObject;
+        }
+
+        public bool ToBool()
+        {
+            bool bResult;
+
+            if (Boolean.TryParse(m_objInternalObject.ToString(), out bResult))
+                return bResult;
+            else
+                return false;
         }
     }
 }

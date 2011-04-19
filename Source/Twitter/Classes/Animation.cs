@@ -67,8 +67,8 @@ namespace Twitter
             }
 
             float fX = m_fRun * fPercentProgress;
-            float fY = (m_fSlope * fX) + m_fYIntercept;
-            Point ptFinal = new Point((int)fX, (int)fY);
+            float fY = (m_fSlope * fX);// +m_fYIntercept;
+            Point ptFinal = new Point((int)fX + m_ptStart.X, (int)fY + (int)m_fYIntercept);
             return ptFinal;
         }
 
