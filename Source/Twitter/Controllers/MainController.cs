@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using Twitter.Json;
 using Twitter.API;
 using Twitter.API.Basic;
 
@@ -32,7 +33,7 @@ namespace Twitter
             if (m_aclAccounts.ActiveAccount != null)
             {
                 //@TODO: uncomment for production
-                m_aclAccounts.ActiveAccount.Connect();
+                //m_aclAccounts.ActiveAccount.Connect();
             }
         }
 
@@ -60,7 +61,7 @@ namespace Twitter
             actSubject.UserStream.Receive += new API.Streaming.UserStream.ReceiveHandler(Account_UserStream_Receive);
         }
 
-        protected void Account_UserStream_Receive(object sender, API.Json.JsonDocument jdData)
+        protected void Account_UserStream_Receive(object sender, JsonDocument jdData)
         {
             if (jdData.Root.IsNode())
             {
@@ -87,6 +88,8 @@ namespace Twitter
                     m_aclAccounts.ActiveAccount.DirectMessages.Add(dmNewMessage);
                     OnDirectMessageReceived(dmNewMessage);
                 }
+
+                //also need to add OnDelete for when a tweet gets deleted
             }
         }
 
@@ -99,6 +102,7 @@ namespace Twitter
         protected virtual void OnTweetReceived(Status stReceived) { }
         protected virtual void OnDirectMessageReceived(DirectMessage dmReceived) { }
         protected virtual void OnReplyReceived(Status stReceived) { }
+        protected virtual void OnDelete(int iStatusId) { }
 
         #endregion
 

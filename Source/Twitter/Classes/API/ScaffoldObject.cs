@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Twitter.API.Json;
+using Twitter.Json;
 
-namespace Twitter.API.Basic
+namespace Twitter.API
 {
     public class ScaffoldObject<T>
     {

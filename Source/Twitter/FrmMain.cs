@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using Twitter.API;
 using Twitter.API.Basic;
 using Twitter.Controls;
-using Twitter.API.Json;
+using Twitter.Json;
 
 namespace Twitter
 {
@@ -27,7 +27,7 @@ namespace Twitter
         }
 
         private SidebarButton m_sbbSelected;
-        private SidebarButtonEnum m_sbeSelected;
+        private SidebarButtonEnum m_sbeSelected = SidebarButtonEnum.Timeline;
         private FrmTweet m_ftTweetForm;
         private FrmPreferences m_fpPrefForm;
         private int m_iTimelineChangeElapsed = 0;
@@ -56,9 +56,9 @@ namespace Twitter
             tmlTimeline.ScrolledToTop = true;
 
             //@TODO: do this for testing purposes only
-            //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
-            //for (int i = 0; i < utLine.Statuses.Count; i++)
-                //Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object));
+            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
+            for (int i = 0; i < utLine.Statuses.Count; i++)
+                Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object));
                 //tmlTimeline.Push(utLine.Statuses[i]);
         }
 
@@ -71,9 +71,9 @@ namespace Twitter
                 tmlTimeline.Top = 0;
                 tmlTimeline.ScrolledToTop = true;
             }
-            else if (iNewTop < (this.ClientSize.Height - tmlTimeline.Height))
+            else if (iNewTop < (this.ClientSize.Height - tmlTimeline.InternalHeight))
             {
-                tmlTimeline.Top = this.ClientSize.Height - tmlTimeline.Height;
+                tmlTimeline.Top = this.ClientSize.Height - tmlTimeline.InternalHeight;
                 tmlTimeline.ScrolledToTop = false;
             }
             else
@@ -88,7 +88,7 @@ namespace Twitter
         private void tsbTimelineScroller_Scroll(object sender, ScrollEventArgs e)
         {
             float fPercentScrolled = (float)e.NewValue / 100.0f;
-            tmlTimeline.Top = -(int)((tmlTimeline.Height - this.ClientSize.Height) * fPercentScrolled);
+            tmlTimeline.Top = -(int)((tmlTimeline.InternalHeight - this.ClientSize.Height) * fPercentScrolled);
             tmlTimeline.ScrolledToTop = (e.Type == ScrollEventType.First);
         }
 
@@ -194,7 +194,12 @@ namespace Twitter
             tsbTimelineScroller.Top = 0;
             tsbTimelineScroller.Height = this.ClientSize.Height;
 
-            //note: tmlTimeline's height is automatically set based on the number of tweets it contains
+            //timeline should be at least as tall as the form
+            if (tmlTimeline.InternalHeight > this.ClientSize.Height)
+                tmlTimeline.Height = tmlTimeline.InternalHeight;
+            else
+                tmlTimeline.Height = this.ClientSize.Height;
+
             tmlTimeline.Left = pnlSidebar.Right;
             UpdateScrollBar();
             
@@ -202,6 +207,14 @@ namespace Twitter
                 tmlTimeline.Width = this.ClientSize.Width - (pnlSidebar.Width + tsbTimelineScroller.Width);
             else
                 tmlTimeline.Width = this.ClientSize.Width - pnlSidebar.Width;
+
+            if (tmlReplyTimeline.InternalHeight > this.ClientSize.Height)
+                tmlReplyTimeline.Height = tmlReplyTimeline.InternalHeight;
+            else
+                tmlReplyTimeline.Height = this.ClientSize.Height;
+
+            tmlReplyTimeline.Width = tmlTimeline.Width;
+            tmlReplyTimeline.Location = tmlTimeline.Location;
 
             pbLarry.Top = pnlSidebar.Height - (pbLarry.Height + 10);
             pnlSidebar.Height = this.ClientSize.Height;
@@ -264,9 +277,13 @@ namespace Twitter
         {
             Timeline tmlCur = TimelineForSelectedSidebarButton();
 
+            tmlCur.BringToFront();
+            pnlSidebar.BringToFront();
+            tmlCur.Visible = true;
             tmlCur.Left = this.ClientSize.Width;
             m_iTimelineChangeElapsed = 0;
-            m_lmaTimelineChangeAnim = new LinearMotionAnimation(new Point(this.ClientSize.Width, 0), new Point(pnlSidebar.Right, 0), 20, LinearMotionAnimation.MotionType.EaseIn);
+            m_lmaTimelineChangeAnim = new LinearMotionAnimation(new Point(this.ClientSize.Width, 0), new Point(pnlSidebar.Right - 6, 0), 25, LinearMotionAnimation.MotionType.EaseIn);
+            UpdateScrollBar();
             tmrTimelineChange.Enabled = true;
         }
 
@@ -305,12 +322,14 @@ namespace Twitter
 
         protected void UpdateScrollBar()
         {
-            if (tmlTimeline.Height > this.ClientSize.Height)
+            Timeline tmlCur = TimelineForSelectedSidebarButton();
+
+            if (tmlCur.InternalHeight > this.ClientSize.Height)
             {
-                int iLargeChange = (int)(((float)this.ClientSize.Height / (float)tmlTimeline.Height) * 100.0f);
+                int iLargeChange = (int)(((float)this.ClientSize.Height / (float)tmlCur.InternalHeight) * 100.0f);
                 tsbTimelineScroller.LargeChange = iLargeChange;
 
-                float fPercent = Math.Abs((float)tmlTimeline.Top) / (float)(tmlTimeline.Height - this.ClientSize.Height);
+                float fPercent = Math.Abs((float)tmlCur.Top) / (float)(tmlCur.InternalHeight - this.ClientSize.Height);
                 tsbTimelineScroller.Value = (int)(tsbTimelineScroller.Max * fPercent);
 
                 tsbTimelineScroller.Visible = true;
@@ -334,7 +353,10 @@ namespace Twitter
             }
 
             if (m_iTimelineChangeElapsed >= m_lmaTimelineChangeAnim.Duration)
+            {
+                tsbTimelineScroller.BringToFront();
                 tmrTimelineChange.Enabled = false;
+            }
         }
     }
 }

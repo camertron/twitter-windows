@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Net;
-using Twitter.API.Json;
+using Twitter.Json;
 
 namespace Twitter.API.Basic
 {

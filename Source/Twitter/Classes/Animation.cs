@@ -62,7 +62,7 @@ namespace Twitter
                     fPercentProgress = (float)Math.Pow((float)iElapsed / (float)m_iDuration, 5);
                     break;
                 case MotionType.EaseIn:
-                    fPercentProgress = ((float)Math.Pow((float)iElapsed / (float)m_iDuration, (1.0f / 4.0f)));
+                    fPercentProgress = ((float)Math.Pow((float)iElapsed / (float)m_iDuration, (1.0f / 4.0f)));  //fourth root
                     break;
             }
 

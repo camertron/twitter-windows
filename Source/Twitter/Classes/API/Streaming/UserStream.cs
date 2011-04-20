@@ -11,7 +11,7 @@ using Hammock;
 using Hammock.Web;
 using Hammock.Streaming;
 using Hammock.Authentication.OAuth;
-using Twitter.API.Json;
+using Twitter.Json;
 using Twitter.API.Basic;
 
 namespace Twitter.API.Streaming

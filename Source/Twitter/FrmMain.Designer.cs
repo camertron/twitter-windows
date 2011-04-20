@@ -239,7 +239,7 @@
             // tmlTimeline
             // 
             this.tmlTimeline.BackColor = System.Drawing.Color.White;
-            this.tmlTimeline.Location = new System.Drawing.Point(67, 0);
+            this.tmlTimeline.Location = new System.Drawing.Point(70, 0);
             this.tmlTimeline.Name = "tmlTimeline";
             this.tmlTimeline.ScrolledToTop = false;
             this.tmlTimeline.Size = new System.Drawing.Size(459, 0);
@@ -259,6 +259,7 @@
             // 
             // tmlReplyTimeline
             // 
+            this.tmlReplyTimeline.BackColor = System.Drawing.Color.White;
             this.tmlReplyTimeline.Location = new System.Drawing.Point(93, 39);
             this.tmlReplyTimeline.Name = "tmlReplyTimeline";
             this.tmlReplyTimeline.ScrolledToTop = true;

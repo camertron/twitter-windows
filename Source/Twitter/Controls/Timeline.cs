@@ -34,6 +34,11 @@ namespace Twitter.Controls
             m_stsControls = new Stack<TimelineStatus>();
         }
 
+        public int InternalHeight
+        {
+            get { return m_iTotalControlHeight; }
+        }
+
         public void Push(Status stToAdd)
         {
             TimelineStatus tsNewStatus = new TimelineStatus(stToAdd);
@@ -48,8 +53,8 @@ namespace Twitter.Controls
             tsNewStatus.BackColor = this.BackColor;
             HookupStatusEvents(tsNewStatus);
 
-            OnResize(EventArgs.Empty);
             m_iTotalControlHeight += tsNewStatus.Height;
+            OnResize(EventArgs.Empty);
 
             if (m_bScrolledToTop)
             {
@@ -124,7 +129,7 @@ namespace Twitter.Controls
         protected override void OnResize(EventArgs e)
         {
             //don't change the height - UpdateLayout will do that every time a tweet is added/removed
-            this.Height = m_iTotalControlHeight;
+            //this.Height = m_iTotalControlHeight;
 
             if (m_stsControls != null)
             {

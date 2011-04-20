@@ -5,14 +5,14 @@ using System.Text;
 using System.Collections;
 using System.IO;
 
-namespace Twitter.API.Json
+namespace Twitter.Json
 {
     /// <summary>
     /// This class represents a finite state automaton (FSA).  It is fed characters
     /// from a source file, one at a time.  These characters cause the FSA to change
     /// state.  When an accepting state is found, the characters that brought the FSA
-    /// from the starting state to that accepting state are, at least in Campiler,
-    /// turned into tokens by the Tokenizer class.
+    /// from the starting state to that accepting state are turned into tokens by the
+    /// Tokenizer class.
     /// </summary>
     public class FSA
     {
@@ -37,7 +37,7 @@ namespace Twitter.API.Json
         private bool bBackUp;
 
         /// <summary>
-        /// The source code language being fed into this FSA.  For campiler, this is Modula-2.
+        /// The source code language being fed into this FSA.
         /// </summary>
         private string sLanguage;
 
@@ -210,7 +210,7 @@ namespace Twitter.API.Json
         }
 
         /// <summary>
-        /// Gets the source code language.  For Campiler, this is Modula-2.
+        /// Gets the source code language.
         /// </summary>
         public string Language
         {
@@ -225,6 +225,11 @@ namespace Twitter.API.Json
             get { return m_stCurrentState; }
         }
 
+        /// <summary>
+        /// Loads a CSV state table from a stream.
+        /// </summary>
+        /// <param name="srInputReader">The stream to read the state table from.</param>
+        /// <returns>Returns an FSA containing states built from the given stream.</returns>
         public static FSA FromStream(StreamReader srInputReader)
         {
             FSA fsaFinal = new FSA();
@@ -239,7 +244,7 @@ namespace Twitter.API.Json
         }
 
         /// <summary>
-        /// Loads an XML state table from a file.
+        /// Loads a CSV state table from a file.
         /// </summary>
         /// <param name="sFileName">The file to load the state table from.</param>
         /// <returns>Returns an FSA containing states built from the given file.</returns>
@@ -260,12 +265,12 @@ namespace Twitter.API.Json
     /// </summary>
     public class FSAState
     {
-        private bool m_bAccepting;              //this state is an accepting state or not
-        private Hashtable m_htInputStates;      //inputs and corresponding states
-        private bool m_bBackUp;                 //whether or not this state requires us to back up in the file stream
-        private string m_sDescription;          //this state's description, (ex:  Found <>)
-        private int iStateNumber;               //this state's index
-        public static char[] c_acSplitters = new char[1] { ',' };
+        private bool m_bAccepting;                                  //this state is an accepting state or not
+        private Hashtable m_htInputStates;                          //inputs and corresponding states
+        private bool m_bBackUp;                                     //whether or not this state requires us to back up in the file stream
+        private string m_sDescription;                              //this state's description, (ex:  Found <>)
+        private int iStateNumber;                                   //this state's index
+        public static char[] c_acSplitters = new char[1] { ',' };   //CSV delimiters used when reading in an FSA from a file or stream
 
         /// <summary>
         /// Default constructor.  Initializes a new instance of FSAState that is not accepting,

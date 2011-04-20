@@ -8,7 +8,7 @@ using System.ComponentModel;
 using Hammock;
 using Hammock.Authentication.OAuth;
 using Hammock.Web;
-using Twitter.API.Json;
+using Twitter.Json;
 
 namespace Twitter.API.Basic
 {

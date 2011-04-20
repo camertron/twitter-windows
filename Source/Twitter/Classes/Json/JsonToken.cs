@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Twitter.API.Json
+namespace Twitter.Json
 {
     public class JsonToken
     {
