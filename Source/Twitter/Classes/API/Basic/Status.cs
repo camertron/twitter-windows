@@ -32,4 +32,44 @@ namespace Twitter.API.Basic
             }
         }
     }
+
+    public class StatusList : List<Status>
+    {
+        private Dictionary<string, Status> m_dStatusesById;
+
+        public StatusList() : base()
+        {
+            m_dStatusesById = new Dictionary<string, Status>();
+        }
+
+        public new void Add(Status stNew)
+        {
+            m_dStatusesById.Add(stNew["id"].ToString(), stNew);
+            base.Add(stNew);
+        }
+
+        public new void Remove(Status stToRemove)
+        {
+            m_dStatusesById.Remove(stToRemove["id"].ToString());
+            base.Remove(stToRemove);
+        }
+
+        public new void RemoveAt(int iIndex)
+        {
+            Status stToRemove = base[iIndex];
+            m_dStatusesById.Remove(stToRemove["id"].ToString());
+            base.RemoveAt(iIndex);
+        }
+
+        public Status this[string sId]
+        {
+            get { return m_dStatusesById[sId]; }
+            set { m_dStatusesById[sId] = value; }
+        }
+
+        public new bool Contains(Status stLookFor)
+        {
+            return m_dStatusesById.ContainsKey(stLookFor["id"].ToString());
+        }
+    }
 }

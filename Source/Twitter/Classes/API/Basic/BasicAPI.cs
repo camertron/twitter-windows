@@ -192,5 +192,22 @@ namespace Twitter.API.Basic
 
             DoRequest("favorites/destroy/" + sStatusId + ".json", WebMethod.Delete, dssParams, new APIReturn(apcCallback, typeof(Status), objCallbackArg));
         }
+
+        public void GetMentions(APICallback apcCallback, object objCallbackArg, int iCount = 20, int iPage = 1, int iSinceId = -1,
+                                int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
+        {
+            CheckAuthenticated();
+
+            Dictionary<string, string> dssParams = new Dictionary<string, string>();
+
+            AddParameter(ref dssParams, "since_id", iSinceId);
+            AddParameter(ref dssParams, "max_id", iMaxId);
+            AddParameter(ref dssParams, "count", iCount);
+            AddParameter(ref dssParams, "page", iPage);
+            AddParameter(ref dssParams, "trim_user", bTrimUser);
+            AddParameter(ref dssParams, "include_entities", bIncludeEntities);
+
+            DoRequest("statuses/mentions.json", WebMethod.Get, dssParams, new APIReturn(apcCallback, typeof(UserTimeline), objCallbackArg));
+        }
     }
 }

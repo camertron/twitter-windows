@@ -18,7 +18,7 @@ namespace Twitter
         private UserStream m_usUserStream = null;
         private StreamingAPI m_sAPI;
         private BasicAPI m_bAPI;
-        private List<Status> m_lstStatuses;
+        private StatusList m_slStatuses;
         private List<DirectMessage> m_ldmDirectMessages;
         private User m_uUserObject = null;
 
@@ -29,6 +29,9 @@ namespace Twitter
             m_sAPI = new StreamingAPI(Literals.C_CONSUMER_KEY, Literals.C_CONSUMER_SECRET);
             m_bAPI.Authenticate(sAccessToken, sAccessSecret, sUsername, sPassword);
             m_sAPI.Authenticate(sAccessToken, sAccessSecret, sUsername, sPassword);
+
+            m_slStatuses = new StatusList();
+            m_ldmDirectMessages = new List<DirectMessage>();
 
             m_usUserStream = m_sAPI.GetUserStream();
         }
@@ -79,9 +82,9 @@ namespace Twitter
             get { return m_sAPI; }
         }
 
-        public List<Status> Statuses
+        public StatusList Statuses
         {
-            get { return m_lstStatuses; }
+            get { return m_slStatuses; }
         }
 
         public List<DirectMessage> DirectMessages

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Threading;
 using Twitter.Json;
 using Twitter.API;
 using Twitter.API.Basic;
+using Twitter.API.Streaming;
 
 namespace Twitter
 {
@@ -33,7 +35,7 @@ namespace Twitter
             if (m_aclAccounts.ActiveAccount != null)
             {
                 //@TODO: uncomment for production
-                //m_aclAccounts.ActiveAccount.Connect();
+                m_aclAccounts.ActiveAccount.Connect();
             }
         }
 
@@ -61,35 +63,31 @@ namespace Twitter
             actSubject.UserStream.Receive += new API.Streaming.UserStream.ReceiveHandler(Account_UserStream_Receive);
         }
 
-        protected void Account_UserStream_Receive(object sender, JsonDocument jdData)
+        protected void Account_UserStream_Receive(object sender, JsonDocument jdData, UserStream.ReceiveType rtRcvType)
         {
-            if (jdData.Root.IsNode())
+            switch (rtRcvType)
             {
-                if (jdData.Root.ToNode().ContainsKey("friends"))
-                {
-                    //this is the friends list that's sent at the beginning of each userstream connection
-                }
-                else if (jdData.Root.ToNode().ContainsKey("retweeted"))
-                {
-                    //it's a tweet!
-                    string sTweetText = jdData.Root.ToNode()["text"].ToString();
+                case UserStream.ReceiveType.Tweet:
+                case UserStream.ReceiveType.Reply:
+                    Status stNewTweet = new Status(jdData.Root.ToNode());
 
-                    Status stNewStatus = new Status(jdData.Root.ToNode());
-                    //m_aclAccounts.ActiveAccount.Statuses.Add(stNewStatus);
+                    if (!m_aclAccounts.ActiveAccount.Statuses.Contains(stNewTweet))
+                    {
+                        m_aclAccounts.ActiveAccount.Statuses.Add(stNewTweet);
 
-                    OnTweetReceived(stNewStatus);
+                        if (rtRcvType == UserStream.ReceiveType.Tweet)
+                            OnTweetReceived(stNewTweet);
+                        else
+                            OnReplyReceived(stNewTweet);
+                    }
 
-                    if ((sTweetText.Length > 0) && (sTweetText[0] == '@'))
-                        OnReplyReceived(stNewStatus);
-                }
-                else if (jdData.Root.ToNode().ContainsKey("recipient_id") && jdData.Root.ToNode().ContainsKey("sender_id"))
-                {
+                    break;
+
+                case UserStream.ReceiveType.DirectMessage:
                     DirectMessage dmNewMessage = new DirectMessage(jdData.Root.ToNode());
                     m_aclAccounts.ActiveAccount.DirectMessages.Add(dmNewMessage);
                     OnDirectMessageReceived(dmNewMessage);
-                }
-
-                //also need to add OnDelete for when a tweet gets deleted
+                    break;
             }
         }
 

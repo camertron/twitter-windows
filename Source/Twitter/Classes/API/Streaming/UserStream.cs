@@ -18,11 +18,20 @@ namespace Twitter.API.Streaming
 {
     public class UserStream
     {
+        public enum ReceiveType
+        {
+            FriendsList = 0,
+            Tweet = 1,
+            Reply = 2,
+            DirectMessage = 3,
+            Delete = 4
+        }
+
         public const string C_BASE_URL = "https://userstream.twitter.com";
         public const string C_USER_STREAM_URL = "user.json";
         public const string C_VERSION_PATH = "2";
 
-        public delegate void ReceiveHandler(object sender, JsonDocument jdData);
+        public delegate void ReceiveHandler(object sender, JsonDocument jdData, ReceiveType rtRecvType);
         public event ReceiveHandler Receive;
 
         private OAuthCredentials m_oaCredentials;
@@ -51,23 +60,38 @@ namespace Twitter.API.Streaming
 
         public void Connect()
         {
-            Thread thdConnect = new Thread(new ThreadStart(Initialize));
+            Thread thdConnect = new Thread(new ThreadStart(HomeTimeline));
             thdConnect.Start();
         }
 
-        private void Initialize()
+        private void HomeTimeline()
         {
             //first get initial timeline from the basic API
-            m_bscAPI.GetHomeTimeline(Start, null);
+            m_bscAPI.GetHomeTimeline(HomeTimelineCallback, null);
         }
 
-        private void Start(APICallbackArgs acArgs)
+        private void HomeTimelineCallback(APICallbackArgs acArgs)
         {
             UserTimeline utInitial = (UserTimeline)acArgs.ResponseObject;
 
             for (int i = utInitial.Statuses.Count - 1; i >= 0; i--)
-                APIReturn.SynchronizeInvoke(Receive, new object[] { this, new JsonDocument(utInitial.Statuses[i].Object) });
+                APIReturn.SynchronizeInvoke(Receive, new object[] { this, new JsonDocument(utInitial.Statuses[i].Object), ReceiveType.Tweet });
 
+            m_bscAPI.GetMentions(MentionsCallback, null);
+        }
+
+        private void MentionsCallback(APICallbackArgs acArgs)
+        {
+            UserTimeline utInitial = (UserTimeline)acArgs.ResponseObject;
+
+            for (int i = utInitial.Statuses.Count - 1; i >= 0; i--)
+                APIReturn.SynchronizeInvoke(Receive, new object[] { this, new JsonDocument(utInitial.Statuses[i].Object), ReceiveType.Reply });
+
+            EstablishStream();
+        }
+
+        private void EstablishStream()
+        {
             //construct and open streaming request
             RestRequest rrqRequest = new RestRequest
             {
@@ -92,7 +116,35 @@ namespace Twitter.API.Streaming
             } while ((sCurLine == "") && (! srReader.EndOfStream));
 
             JsonDocument jdFinal = JsonParser.GetParser().ParseString(sCurLine);
-            APIReturn.SynchronizeInvoke(Receive, this, jdFinal);
+
+            if (jdFinal.Root.IsNode())
+            {
+                if (jdFinal.Root.ToNode().ContainsKey("friends"))
+                {
+                    //this is the friends list that's sent at the beginning of each userstream connection
+                    APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.FriendsList);
+                }
+                else if (jdFinal.Root.ToNode().ContainsKey("retweeted"))
+                {
+                    //it's a tweet!
+                    string sTweetText = jdFinal.Root.ToNode()["text"].ToString();
+                    string sUsername = "@" + m_oaCredentials.ClientUsername;
+
+                    Status stNewStatus = new Status(jdFinal.Root.ToNode());
+
+                    if ((sTweetText.Length > sUsername.Length) && (sTweetText.Substring(0, sUsername.Length) == sUsername))
+                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
+                    else
+                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
+                }
+                else if (jdFinal.Root.ToNode().ContainsKey("recipient_id") && jdFinal.Root.ToNode().ContainsKey("sender_id"))
+                {
+                    DirectMessage dmNewMessage = new DirectMessage(jdFinal.Root.ToNode());
+                    APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.DirectMessage);
+                }
+
+                //also need to add OnDelete for when a tweet gets deleted
+            }
         }
 
         public void Disconnect()
