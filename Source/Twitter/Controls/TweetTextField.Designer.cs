@@ -28,17 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.rtbTextBox = new System.Windows.Forms.RichTextBox();
+            this.rtbTextBox = new CustomRichTextBox();
             this.SuspendLayout();
             // 
             // rtbTextBox
             // 
             this.rtbTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtbTextBox.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.rtbTextBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.rtbTextBox.DetectUrls = false;
             this.rtbTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rtbTextBox.Location = new System.Drawing.Point(64, 28);
             this.rtbTextBox.Name = "rtbTextBox";
+            this.rtbTextBox.ReadOnly = true;
             this.rtbTextBox.Size = new System.Drawing.Size(344, 81);
             this.rtbTextBox.TabIndex = 0;
             this.rtbTextBox.TabStop = false;
@@ -57,6 +58,6 @@
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox rtbTextBox;
+        private CustomRichTextBox rtbTextBox;
     }
 }

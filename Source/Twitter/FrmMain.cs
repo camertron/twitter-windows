@@ -56,9 +56,9 @@ namespace Twitter
             tmlTimeline.ScrolledToTop = true;
 
             //@TODO: do this for testing purposes only
-            //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
-            //for (int i = 0; i < utLine.Statuses.Count; i++)
-                //Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object));
+            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
+            for (int i = 0; i < utLine.Statuses.Count; i++)
+                Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
                 //tmlTimeline.Push(utLine.Statuses[i]);
         }
 

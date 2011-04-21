@@ -30,7 +30,7 @@ namespace Twitter.Controls
         [DllImport("user32.dll", EntryPoint = "HideCaret")]
         public static extern long HideCaret(IntPtr hwnd);
 
-        protected override void WndProc(ref Message m)
+        /*protected override void WndProc(ref Message m)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace Twitter.Controls
                 HideCaret(rtbTextBox.Handle);
             }
             catch { }  //can throw errors when this object is being destroyed
-        }
+        }*/
 
         public TweetTextField()
         {
@@ -55,6 +55,13 @@ namespace Twitter.Controls
 
             rtbTextBox.Click += new EventHandler(rtbTextBox_Click);
             rtbTextBox.TextChanged += new EventHandler(rtbTextBox_TextChanged);
+            rtbTextBox.MouseWheel += new MouseEventHandler(rtbTextBox_MouseWheel);
+        }
+
+        private void rtbTextBox_MouseWheel(object sender, MouseEventArgs e)
+        {
+            MessageBox.Show("rtbTextBox");
+            OnMouseWheel(e);
         }
 
         public new bool Focus()

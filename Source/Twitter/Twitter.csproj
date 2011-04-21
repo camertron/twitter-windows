@@ -77,6 +77,9 @@
     <Compile Include="Controls\ActionButton.Designer.cs">
       <DependentUpon>ActionButton.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CustomRichTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\SidebarButton.cs">
       <SubType>UserControl</SubType>
     </Compile>
