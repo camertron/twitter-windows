@@ -10,10 +10,14 @@ namespace Twitter.API.Basic
     {
         private User m_uUser = null;
         private JsonNode m_jnNode;
+        private StatusText m_stStatusText;
 
         public Status(JsonNode jnNode) : base(jnNode)
         {
             m_jnNode = jnNode;
+
+            if (m_jnNode.ContainsKey("text") && m_jnNode["text"].IsString())
+                m_stStatusText = StatusText.FromString(m_jnNode["text"].ToString());
         }
 
         public User User
@@ -30,6 +34,11 @@ namespace Twitter.API.Basic
 
                 return m_uUser;
             }
+        }
+
+        public StatusText StatusText
+        {
+            get { return m_stStatusText; }
         }
     }
 

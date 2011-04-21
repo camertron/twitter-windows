@@ -51,6 +51,7 @@
             this.tsbTimelineScroller = new Twitter.Controls.ThinScrollbar();
             this.tmlReplyTimeline = new Twitter.Controls.Timeline();
             this.tmrTimelineChange = new System.Windows.Forms.Timer(this.components);
+            this.button1 = new System.Windows.Forms.Button();
             this.pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLarry)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).BeginInit();
@@ -60,6 +61,7 @@
             // pnlSidebar
             // 
             this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            this.pnlSidebar.Controls.Add(this.button1);
             this.pnlSidebar.Controls.Add(this.pbLarry);
             this.pnlSidebar.Controls.Add(this.pbAvatar);
             this.pnlSidebar.Controls.Add(this.sbbSearch);
@@ -272,6 +274,16 @@
             this.tmrTimelineChange.Interval = 1;
             this.tmrTimelineChange.Tick += new System.EventHandler(this.tmrTimelineChange_Tick);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(11, 329);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(47, 23);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -319,6 +331,7 @@
         private Controls.ThinScrollbar tsbTimelineScroller;
         private Controls.Timeline tmlReplyTimeline;
         private System.Windows.Forms.Timer tmrTimelineChange;
+        private System.Windows.Forms.Button button1;
 
     }
 }

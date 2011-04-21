@@ -126,8 +126,28 @@ namespace Twitter.API.Streaming
                 }
                 else if (jdFinal.Root.ToNode().ContainsKey("retweeted"))
                 {
+                    Status stNewStatus = new Status(jdFinal.Root.ToNode());
+                    string sUsername = "@" + m_oaCredentials.ClientUsername;
+                    bool bIsReply = false;
+
+                    for (int i = 0; i < stNewStatus.StatusText.Words.Count; i++)
+                    {
+                        if (stNewStatus.StatusText.Words[i].Type == StatusTextElement.StatusTextElementType.ScreenName)
+                        {
+                            if (stNewStatus.StatusText.Words[i].Text == sUsername)
+                                bIsReply = true;
+                        }
+                        else
+                            break;
+                    }
+
+                    if (bIsReply)
+                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
+                    else
+                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
+
                     //it's a tweet!
-                    string sTweetText = jdFinal.Root.ToNode()["text"].ToString();
+                    /*string sTweetText = jdFinal.Root.ToNode()["text"].ToString();
                     string sUsername = "@" + m_oaCredentials.ClientUsername;
 
                     Status stNewStatus = new Status(jdFinal.Root.ToNode());
@@ -135,7 +155,7 @@ namespace Twitter.API.Streaming
                     if ((sTweetText.Length > sUsername.Length) && (sTweetText.Substring(0, sUsername.Length) == sUsername))
                         APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
                     else
-                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
+                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);*/
                 }
                 else if (jdFinal.Root.ToNode().ContainsKey("recipient_id") && jdFinal.Root.ToNode().ContainsKey("sender_id"))
                 {

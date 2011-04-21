@@ -56,9 +56,9 @@ namespace Twitter
             tmlTimeline.ScrolledToTop = true;
 
             //@TODO: do this for testing purposes only
-            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
-            for (int i = 0; i < utLine.Statuses.Count; i++)
-                Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+            //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
+            //for (int i = 0; i < utLine.Statuses.Count; i++)
+               // Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
                 //tmlTimeline.Push(utLine.Statuses[i]);
         }
 
@@ -150,6 +150,7 @@ namespace Twitter
         {
             tmlTimeline.Push(stReceived);
             UpdateScrollBar();
+            OnResize(EventArgs.Empty);
         }
 
         protected override void OnDirectMessageReceived(DirectMessage dmReceived)
@@ -165,24 +166,26 @@ namespace Twitter
         protected override void OnReplyReceived(Status stReceived)
         {
             tmlReplyTimeline.Push(stReceived);
+            UpdateScrollBar();
+            OnResize(EventArgs.Empty);
         }
 
         #endregion
 
-        private void tmlTimeline_StatusTextClicked(object sender, Status stStatus, TweetTextElement tstElement)
+        private void tmlTimeline_StatusTextClicked(object sender, Status stStatus, StatusTextElement stElement)
         {
-            switch (tstElement.Type)
+            switch (stElement.Type)
             {
-                case TweetTextElement.TextElementType.URL:
+                case StatusTextElement.StatusTextElementType.URL:
                     //open browser - let the windows shell handle it
-                    System.Diagnostics.Process.Start(tstElement.Text);
+                    System.Diagnostics.Process.Start(stElement.Text);
                     break;
 
-                case TweetTextElement.TextElementType.Hashtag:
+                case StatusTextElement.StatusTextElementType.Hashtag:
                     //show the view for that hashtag
                     break;
 
-                case TweetTextElement.TextElementType.ScreenName:
+                case StatusTextElement.StatusTextElementType.ScreenName:
                     //show the view for that screen name
                     break;
             }
@@ -282,7 +285,7 @@ namespace Twitter
             tmlCur.Visible = true;
             tmlCur.Left = this.ClientSize.Width;
             m_iTimelineChangeElapsed = 0;
-            m_lmaTimelineChangeAnim = new LinearMotionAnimation(new Point(this.ClientSize.Width, 0), new Point(pnlSidebar.Right - 6, 0), 25, LinearMotionAnimation.MotionType.EaseIn);
+            m_lmaTimelineChangeAnim = new LinearMotionAnimation(new Point(this.ClientSize.Width, 0), new Point(pnlSidebar.Right, 0), 30, LinearMotionAnimation.MotionType.EaseIn);
             UpdateScrollBar();
             tmrTimelineChange.Enabled = true;
         }
@@ -352,11 +355,18 @@ namespace Twitter
                 m_iTimelineChangeElapsed++;
             }
 
-            if (m_iTimelineChangeElapsed >= m_lmaTimelineChangeAnim.Duration)
+            if (m_iTimelineChangeElapsed > m_lmaTimelineChangeAnim.Duration)
             {
                 tsbTimelineScroller.BringToFront();
                 tmrTimelineChange.Enabled = false;
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_single.json").Root.ToList());
+            for (int i = 0; i < utLine.Statuses.Count; i++)
+                Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
         }
     }
 }

@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.rtbTextBox = new CustomRichTextBox();
+            this.rtbTextBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // rtbTextBox
@@ -39,7 +39,6 @@
             this.rtbTextBox.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rtbTextBox.Location = new System.Drawing.Point(64, 28);
             this.rtbTextBox.Name = "rtbTextBox";
-            this.rtbTextBox.ReadOnly = true;
             this.rtbTextBox.Size = new System.Drawing.Size(344, 81);
             this.rtbTextBox.TabIndex = 0;
             this.rtbTextBox.TabStop = false;
@@ -58,6 +57,6 @@
 
         #endregion
 
-        private CustomRichTextBox rtbTextBox;
+        private System.Windows.Forms.RichTextBox rtbTextBox;
     }
 }

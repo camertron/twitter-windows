@@ -5,13 +5,14 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+using Twitter.API;
 using Twitter.API.Basic;
 
 namespace Twitter.Controls
 {
     public partial class Timeline : UserControl
     {
-        public delegate void StatusTextClickedHandler(object sender, Status stStatus, TweetTextElement tstElement);
+        public delegate void StatusTextClickedHandler(object sender, Status stStatus, StatusTextElement tstElement);
         public delegate void StatusOptionClickedHandler(object sender, TimelineStatus tsControl, Status stStatus);
 
         public event StatusTextClickedHandler StatusTextClicked;
@@ -32,6 +33,11 @@ namespace Twitter.Controls
             InitializeComponent();
 
             m_stsControls = new Stack<TimelineStatus>();
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            //MessageBox.Show("Timeline");
         }
 
         public int InternalHeight
@@ -62,6 +68,11 @@ namespace Twitter.Controls
                     tsNewStatus.Top = tsOldTop.Top - tsNewStatus.Height;
                 else
                     tsNewStatus.Top = -(tsNewStatus.Height);
+            }
+            else
+            {
+                tsNewStatus.Top = 0;
+                this.Top -= tsNewStatus.Height;
             }
 
             tsNewStatus.Visible = true;
@@ -108,10 +119,10 @@ namespace Twitter.Controls
                 RetweetClicked(this, (TimelineStatus)sender, ((TimelineStatus)sender).StatusObj);
         }
 
-        private void Status_TextElementClicked(object sender, TweetTextElement tstElement)
+        private void Status_TextElementClicked(object sender, StatusTextElement stElement)
         {
             if (StatusTextClicked != null)
-                StatusTextClicked(this, ((TimelineStatus)sender).StatusObj, tstElement);
+                StatusTextClicked(this, ((TimelineStatus)sender).StatusObj, stElement);
         }
 
         //returns final control height
@@ -123,6 +134,23 @@ namespace Twitter.Controls
                 m_lmaMotion = new LinearMotionAnimation(new Point(0, tsTop.Top), new Point(0, 0), 40, LinearMotionAnimation.MotionType.EaseIn);
                 m_iAnimateTimeElapsed = 0;
                 tmrTweetAnimate.Enabled = true;
+            }
+            else
+            {
+                Stack<TimelineStatus>.Enumerator stsEnum = m_stsControls.GetEnumerator();
+                TimelineStatus tsPrev = null;
+
+                stsEnum.MoveNext();
+                tsPrev = stsEnum.Current;
+
+                while (stsEnum.MoveNext())
+                {
+                    stsEnum.Current.Top = tsPrev.Bottom;
+                    stsEnum.Current.Width = this.Width;
+                    stsEnum.Current.Left = 0;
+                    stsEnum.Current.Invalidate();
+                    tsPrev = stsEnum.Current;
+                }
             }
         }
 

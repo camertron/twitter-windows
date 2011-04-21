@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
+using Twitter.API;
 using Twitter.API.Basic;
 
 namespace Twitter.Controls
@@ -48,7 +49,7 @@ namespace Twitter.Controls
             m_pnBorderPen = new Pen(Color.FromArgb(220, 220, 220));
 
             m_stStatusObj = stFrom;
-            ttfTextField.Text = m_stStatusObj["text"].ToString();
+            ttfTextField.UpdateFromStatus(m_stStatusObj);
             m_sFromUser = m_stStatusObj.User["screen_name"].ToString();
             Favorite = Boolean.Parse(stFrom["favorited"].ToString());
 
@@ -60,6 +61,11 @@ namespace Twitter.Controls
             abFavorite.Click += new EventHandler(abFavorite_Click);
             abReply.Click += new EventHandler(abReply_Click);
             abConversation.Click += new EventHandler(abConversation_Click);
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            //MessageBox.Show("TimelineStatus");
         }
 
         private void abConversation_Click(object sender, EventArgs e)
@@ -99,10 +105,10 @@ namespace Twitter.Controls
                 QuoteTweetClicked(this, e);
         }
 
-        private void ttfTextField_TextElementClicked(object sender, TweetTextElement tstElement)
+        private void ttfTextField_TextElementClicked(object sender, StatusTextElement stElement)
         {
             if (TextElementClicked != null)
-                TextElementClicked(this, tstElement);
+                TextElementClicked(this, stElement);
         }
 
         private void AvatarCallback(object sender, Bitmap bmpAvatar, object objContext)
