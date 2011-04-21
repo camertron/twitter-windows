@@ -42,6 +42,12 @@ namespace Twitter.API.Basic
 
         private void DoRequestCallback(RestRequest rrqRequest, RestResponse rrsResponse, object objUserState)
         {
+            /*StreamWriter swWriter = new StreamWriter("C:/Users/le grand fromage/Desktop/tweets.json", true, Encoding.UTF8);
+            StreamReader srReader = new StreamReader(rrsResponse.ContentStream, Encoding.UTF8);
+            swWriter.WriteLine(srReader.ReadToEnd());
+            swWriter.Close();
+            return;*/
+
             JsonDocument jsDoc = JsonParser.GetParser().ParseStream(new StreamReader(rrsResponse.ContentStream, Encoding.UTF8));
             APIReturn aprReturn = (APIReturn)objUserState;
             object objToReturn = null;

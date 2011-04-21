@@ -145,17 +145,6 @@ namespace Twitter.API.Streaming
                         APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
                     else
                         APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
-
-                    //it's a tweet!
-                    /*string sTweetText = jdFinal.Root.ToNode()["text"].ToString();
-                    string sUsername = "@" + m_oaCredentials.ClientUsername;
-
-                    Status stNewStatus = new Status(jdFinal.Root.ToNode());
-
-                    if ((sTweetText.Length > sUsername.Length) && (sTweetText.Substring(0, sUsername.Length) == sUsername))
-                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
-                    else
-                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);*/
                 }
                 else if (jdFinal.Root.ToNode().ContainsKey("recipient_id") && jdFinal.Root.ToNode().ContainsKey("sender_id"))
                 {

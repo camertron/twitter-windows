@@ -8,6 +8,7 @@ namespace Twitter.API.Basic
 {
     public class Status : ScaffoldObject<JsonNode>
     {
+        private Status m_stRetweetedStatus = null;
         private User m_uUser = null;
         private JsonNode m_jnNode;
         private StatusText m_stStatusText;
@@ -34,6 +35,28 @@ namespace Twitter.API.Basic
 
                 return m_uUser;
             }
+        }
+
+        public Status RetweetedStatus
+        {
+            get
+            {
+                if (m_stRetweetedStatus == null)
+                {
+                    if (m_jnNode.ContainsKey("retweeted_status"))
+                        m_stRetweetedStatus = new Status(m_jnNode["retweeted_status"].ToNode());
+                    else
+                        m_stRetweetedStatus = null;
+                }
+
+                return m_stRetweetedStatus;
+            }
+        }
+
+        //if this status is showing up in your timeline because it was retweeted
+        public bool WasRetweeted
+        {
+            get { return m_jnNode.ContainsKey("retweeted_status"); }
         }
 
         public StatusText StatusText

@@ -50,8 +50,12 @@ namespace Twitter.Controls
 
             m_stStatusObj = stFrom;
             ttfTextField.UpdateFromStatus(m_stStatusObj);
-            m_sFromUser = m_stStatusObj.User["screen_name"].ToString();
             Favorite = Boolean.Parse(stFrom["favorited"].ToString());
+
+            if (m_stStatusObj.WasRetweeted)
+                m_sFromUser = m_stStatusObj.RetweetedStatus.User["screen_name"].ToString();
+            else
+                m_sFromUser = m_stStatusObj.User["screen_name"].ToString();
 
             AsyncContentManager.GetManager().RequestImage(m_stStatusObj.User["profile_image_url"].ToString(), AvatarCallback);
 
@@ -61,11 +65,6 @@ namespace Twitter.Controls
             abFavorite.Click += new EventHandler(abFavorite_Click);
             abReply.Click += new EventHandler(abReply_Click);
             abConversation.Click += new EventHandler(abConversation_Click);
-        }
-
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            //MessageBox.Show("TimelineStatus");
         }
 
         private void abConversation_Click(object sender, EventArgs e)
