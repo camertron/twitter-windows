@@ -127,21 +127,8 @@ namespace Twitter.API.Streaming
                 else if (jdFinal.Root.ToNode().ContainsKey("retweeted"))
                 {
                     Status stNewStatus = new Status(jdFinal.Root.ToNode());
-                    string sUsername = "@" + m_oaCredentials.ClientUsername;
-                    bool bIsReply = false;
 
-                    for (int i = 0; i < stNewStatus.StatusText.Words.Count; i++)
-                    {
-                        if (stNewStatus.StatusText.Words[i].Type == StatusTextElement.StatusTextElementType.ScreenName)
-                        {
-                            if (stNewStatus.StatusText.Words[i].Text == sUsername)
-                                bIsReply = true;
-                        }
-                        else
-                            break;
-                    }
-
-                    if (bIsReply)
+                    if (stNewStatus.IsReply && stNewStatus.ReplyNames.Contains(m_oaCredentials.ClientUsername))
                         APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
                     else
                         APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);

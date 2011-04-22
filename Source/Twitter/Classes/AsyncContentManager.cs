@@ -115,15 +115,22 @@ namespace Twitter
 
             while (m_bKeepWorkerAlive)
             {
-                if (m_qWorkQueue.Count > 0)
+                try
                 {
-                    asCurContent = m_qWorkQueue.Dequeue();
-
-                    switch (asCurContent.Type)
+                    if (m_qWorkQueue.Count > 0)
                     {
-                        case AsyncContent.ContentType.Image:
-                            WorkOnImage(asCurContent, wcClient); break;
+                        asCurContent = m_qWorkQueue.Dequeue();
+
+                        switch (asCurContent.Type)
+                        {
+                            case AsyncContent.ContentType.Image:
+                                WorkOnImage(asCurContent, wcClient); break;
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    //@todo: log this exception
                 }
             }
         }

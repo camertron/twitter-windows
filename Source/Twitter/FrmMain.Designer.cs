@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.pnlSidebar = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.pbLarry = new System.Windows.Forms.PictureBox();
             this.pbAvatar = new System.Windows.Forms.PictureBox();
             this.sbbSearch = new Twitter.Controls.SidebarButton();
@@ -51,7 +52,6 @@
             this.tsbTimelineScroller = new Twitter.Controls.ThinScrollbar();
             this.tmlReplyTimeline = new Twitter.Controls.Timeline();
             this.tmrTimelineChange = new System.Windows.Forms.Timer(this.components);
-            this.button1 = new System.Windows.Forms.Button();
             this.pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLarry)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).BeginInit();
@@ -74,6 +74,16 @@
             this.pnlSidebar.Name = "pnlSidebar";
             this.pnlSidebar.Size = new System.Drawing.Size(68, 676);
             this.pnlSidebar.TabIndex = 5;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(11, 329);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(47, 23);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // pbLarry
             // 
@@ -273,16 +283,6 @@
             // 
             this.tmrTimelineChange.Interval = 1;
             this.tmrTimelineChange.Tick += new System.EventHandler(this.tmrTimelineChange_Tick);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(11, 329);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(47, 23);
-            this.button1.TabIndex = 8;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // FrmMain
             // 

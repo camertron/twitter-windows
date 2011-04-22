@@ -38,7 +38,7 @@ namespace Twitter.Controls
         public event EventHandler ReplyClicked;
         public event EventHandler ConversationClicked;
 
-        public TimelineStatus(Status stFrom)
+        public TimelineStatus(Status stFrom, BasicAPI bAPI)
         {
             InitializeComponent();
 
@@ -52,12 +52,24 @@ namespace Twitter.Controls
             ttfTextField.UpdateFromStatus(m_stStatusObj);
             Favorite = Boolean.Parse(stFrom["favorited"].ToString());
 
-            if (m_stStatusObj.WasRetweeted)
-                m_sFromUser = m_stStatusObj.RetweetedStatus.User["screen_name"].ToString();
+            if (m_stStatusObj.IsRetweet)
+            {
+                if (m_stStatusObj.RetweetedStatus == null)
+                {
+                    m_sFromUser = "";
+                    bAPI.LookupUser(UserLookupCallback, null, new List<string>(new string[] { "" }));
+                }
+                else
+                {
+                    m_sFromUser = m_stStatusObj.RetweetedStatus.User["screen_name"].ToString();
+                    AsyncContentManager.GetManager().RequestImage(m_stStatusObj.RetweetedStatus["profile_image_url"].ToString(), AvatarCallback);
+                }
+            }
             else
+            {
                 m_sFromUser = m_stStatusObj.User["screen_name"].ToString();
-
-            AsyncContentManager.GetManager().RequestImage(m_stStatusObj.User["profile_image_url"].ToString(), AvatarCallback);
+                AsyncContentManager.GetManager().RequestImage(m_stStatusObj["profile_image_url"].ToString(), AvatarCallback);
+            }
 
             ttfTextField.TextElementClicked += new TweetTextField.TextElementClickHandler(ttfTextField_TextElementClicked);
 
@@ -65,6 +77,23 @@ namespace Twitter.Controls
             abFavorite.Click += new EventHandler(abFavorite_Click);
             abReply.Click += new EventHandler(abReply_Click);
             abConversation.Click += new EventHandler(abConversation_Click);
+        }
+
+        private void UserLookupCallback(APICallbackArgs acArgs)
+        {
+        }
+
+        private void AvatarCallback(object sender, Bitmap bmpAvatar, object objContext)
+        {
+            //for some reason, a few of the avatars are weird sizes (I'm looking at you, TechCrunch)
+            //this code resizes the avatar before its displayed so nothing overlaps and looks weird
+            Bitmap bmpResized = new Bitmap(C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
+
+            using (Graphics gCanvas = Graphics.FromImage(bmpResized))
+                gCanvas.DrawImage(bmpAvatar, 0, 0, C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
+
+            m_bmpAvatar = Imaging.RoundAvatarCorners(bmpResized);
+            this.Invalidate();  //force redraw
         }
 
         private void abConversation_Click(object sender, EventArgs e)
@@ -108,19 +137,6 @@ namespace Twitter.Controls
         {
             if (TextElementClicked != null)
                 TextElementClicked(this, stElement);
-        }
-
-        private void AvatarCallback(object sender, Bitmap bmpAvatar, object objContext)
-        {
-            //for some reason, a few of the avatars are weird sizes (I'm looking at you, TechCrunch)
-            //this code resizes the avatar before its displayed so nothing overlaps and looks weird
-            Bitmap bmpResized = new Bitmap(C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
-
-            using (Graphics gCanvas = Graphics.FromImage(bmpResized))
-                gCanvas.DrawImage(bmpAvatar, 0, 0, C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
-
-            m_bmpAvatar = Imaging.RoundAvatarCorners(bmpResized);
-            this.Invalidate();  //force redraw
         }
 
         public bool Favorite

@@ -12,13 +12,27 @@ namespace Twitter.API.Basic
         private User m_uUser = null;
         private JsonNode m_jnNode;
         private StatusText m_stStatusText;
+        private bool m_bIsRetweet = false;
+        private bool m_bIsReply = false;
+        private List<string> m_lsReplyNames;
 
         public Status(JsonNode jnNode) : base(jnNode)
         {
             m_jnNode = jnNode;
+            m_lsReplyNames = new List<string>();
 
             if (m_jnNode.ContainsKey("text") && m_jnNode["text"].IsString())
+            {
                 m_stStatusText = StatusText.FromString(m_jnNode["text"].ToString());
+                m_bIsRetweet = (m_stStatusText.Words.Count > 0) && (m_stStatusText.Words[0].Type == StatusTextElement.StatusTextElementType.ScreenName);
+                m_bIsReply = (m_jnNode.ContainsKey("retweeted_status")) || (m_stStatusText.Words.Count > 0) && (m_stStatusText.Words[0].Text == "RT");
+
+                for (int i = 0; i < m_stStatusText.Words.Count; i++)
+                {
+                    if (m_stStatusText.Words[i].Type == StatusTextElement.StatusTextElementType.ScreenName)
+                        m_lsReplyNames.Add(m_stStatusText.Words[i].Text);
+                }
+            }
         }
 
         public User User
@@ -45,18 +59,27 @@ namespace Twitter.API.Basic
                 {
                     if (m_jnNode.ContainsKey("retweeted_status"))
                         m_stRetweetedStatus = new Status(m_jnNode["retweeted_status"].ToNode());
-                    else
-                        m_stRetweetedStatus = null;
                 }
 
                 return m_stRetweetedStatus;
             }
+            set { m_stRetweetedStatus = value; }
         }
 
         //if this status is showing up in your timeline because it was retweeted
-        public bool WasRetweeted
+        public bool IsRetweet
         {
-            get { return m_jnNode.ContainsKey("retweeted_status"); }
+            get { return m_bIsRetweet; }
+        }
+
+        public bool IsReply
+        {
+            get { return m_bIsReply; }
+        }
+
+        public List<string> ReplyNames
+        {
+            get { return m_lsReplyNames; }
         }
 
         public StatusText StatusText

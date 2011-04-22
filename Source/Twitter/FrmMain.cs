@@ -9,6 +9,7 @@ using Twitter.API;
 using Twitter.API.Basic;
 using Twitter.Controls;
 using Twitter.Json;
+using System.IO;
 
 namespace Twitter
 {
@@ -364,9 +365,17 @@ namespace Twitter
 
         private void button1_Click(object sender, EventArgs e)
         {
-            UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_single.json").Root.ToList());
+            /*UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_single.json").Root.ToList());
             for (int i = 0; i < utLine.Statuses.Count; i++)
-                Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+                Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);*/
+
+            StreamReader srReader = new StreamReader("../../../../Documents/test/tweets/tweets2.json");
+            while (!srReader.EndOfStream)
+            {
+                UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseString(srReader.ReadLine()).Root.ToList());
+                for (int i = 0; i < utLine.Statuses.Count; i++)
+                    Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+            }
         }
     }
 }
