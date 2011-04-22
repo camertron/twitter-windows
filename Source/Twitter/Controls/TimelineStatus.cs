@@ -21,16 +21,22 @@ namespace Twitter.Controls
         private const int C_AVATAR_HEIGHT = 48;
         private const int C_ACTION_BUTTON_SHADE = 50;
         private const int C_FROM_USER_HEIGHT = 15;
+        private const int C_RETWEET_HEIGHT = 10;
+        private const int C_RETWEET_VERT_SPACING = 7;
+        private const int C_RETWEET_TEXT_VERT_SPACING = 5;
+        private const int C_RETWEEET_TEXT_HORIZ_SPACING = 17;
 
         private string m_sFromUser;
         private Status m_stStatusObj;
         private bool m_bDisplayConversationButton;
 
         private Bitmap m_bmpAvatar = null;
-        private Font m_fntFont;
+        private Font m_fntScreenNameFont;
+        private Font m_fntRetweetedFont;
         private Font m_fntFromUser;
         private Pen m_pnBorderPen;
         private SolidBrush m_sbFromUser;
+        private SolidBrush m_sbRetweet;
         private BasicAPI m_bAPI;
 
         public event TweetTextField.TextElementClickHandler TextElementClicked;
@@ -46,9 +52,11 @@ namespace Twitter.Controls
 
             m_bAPI = bAPI;
             m_bDisplayConversationButton = false;
-            m_fntFont = new Font("Arial", 10);
+            m_fntScreenNameFont = new Font("Arial", 10);
+            m_fntRetweetedFont = new Font("Arial", 8);
             m_fntFromUser = new Font("Arial", 10, FontStyle.Bold);
             m_sbFromUser = new SolidBrush(Color.Black);
+            m_sbRetweet = new SolidBrush(Color.FromArgb(70, 70, 70));
             m_pnBorderPen = new Pen(Color.FromArgb(220, 220, 220));
 
             m_stStatusObj = stFrom;
@@ -218,11 +226,16 @@ namespace Twitter.Controls
             ttfTextField.Width = this.Width - (ttfTextField.Left + C_CONTROL_MARGIN);
             //ttfTextField.Height set automatically
 
+            int iExtraRetweetHeight = 0;
+
+            if ((m_stStatusObj != null) && m_stStatusObj.IsRetweet)
+                iExtraRetweetHeight = C_RETWEET_VERT_SPACING + C_RETWEET_HEIGHT;
+
             //set height based on height of TweetTextField
-            if (ttfTextField.Bottom > (C_AVATAR_HEIGHT + (C_CONTROL_MARGIN * 2)))
-                this.Height = ttfTextField.Bottom + C_CONTROL_MARGIN;
+            if ((ttfTextField.Bottom + iExtraRetweetHeight) > (C_AVATAR_HEIGHT + (C_CONTROL_MARGIN * 2)))
+                this.Height = ttfTextField.Bottom + C_CONTROL_MARGIN + iExtraRetweetHeight;
             else
-                this.Height = C_AVATAR_HEIGHT + (C_CONTROL_MARGIN * 2);
+                this.Height = C_AVATAR_HEIGHT + (C_CONTROL_MARGIN * 2) + iExtraRetweetHeight;
 
             pbFavoriteBadge.Left = this.Width - pbFavoriteBadge.Width;
             pbFavoriteBadge.Top = 0;
@@ -261,6 +274,13 @@ namespace Twitter.Controls
 
             //tweet came from this user
             e.Graphics.DrawString(m_sFromUser, m_fntFromUser, m_sbFromUser, iX, iY - 2);
+
+            //draw retweet text if necessary
+            if (m_stStatusObj.IsRetweet)
+            {
+                e.Graphics.DrawImage((Image)ResourceManager.GetManager().GetBitmap("retweet-indicator-small.png"), ttfTextField.Left, ttfTextField.Bottom + C_RETWEET_VERT_SPACING);
+                e.Graphics.DrawString("by " + m_stStatusObj.User["screen_name"], m_fntRetweetedFont, m_sbRetweet, ttfTextField.Left + C_RETWEEET_TEXT_HORIZ_SPACING, ttfTextField.Bottom + C_RETWEET_TEXT_VERT_SPACING);
+            }
 
             //aesthetic line that divides tweet controls
             e.Graphics.DrawLine(m_pnBorderPen, 0, this.Height - 1, this.Width, this.Height - 1);
