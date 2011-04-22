@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
+using System.Threading;
 using Twitter.API;
 using Twitter.API.Basic;
 
@@ -30,6 +31,7 @@ namespace Twitter.Controls
         private Font m_fntFromUser;
         private Pen m_pnBorderPen;
         private SolidBrush m_sbFromUser;
+        private BasicAPI m_bAPI;
 
         public event TweetTextField.TextElementClickHandler TextElementClicked;
         public event EventHandler RetweetClicked;
@@ -42,6 +44,7 @@ namespace Twitter.Controls
         {
             InitializeComponent();
 
+            m_bAPI = bAPI;
             m_bDisplayConversationButton = false;
             m_fntFont = new Font("Arial", 10);
             m_fntFromUser = new Font("Arial", 10, FontStyle.Bold);
@@ -56,19 +59,22 @@ namespace Twitter.Controls
             {
                 if (m_stStatusObj.RetweetedStatus == null)
                 {
-                    m_sFromUser = "";
-                    bAPI.LookupUser(UserLookupCallback, null, new List<string>(new string[] { "" }));
+                    if ((m_stStatusObj.StatusText.Words.Count > 1) && (m_stStatusObj.StatusText.Words[1].Type == StatusTextElement.StatusTextElementType.ScreenName))
+                    {
+                        m_sFromUser = m_stStatusObj.StatusText.Words[1].Text.Substring(1);
+                        new Thread(new ThreadStart(UserLookup)).Start();
+                    }
                 }
                 else
                 {
                     m_sFromUser = m_stStatusObj.RetweetedStatus.User["screen_name"].ToString();
-                    AsyncContentManager.GetManager().RequestImage(m_stStatusObj.RetweetedStatus["profile_image_url"].ToString(), AvatarCallback);
+                    AsyncContentManager.GetManager().RequestImage(m_stStatusObj.RetweetedStatus.User["profile_image_url"].ToString(), AvatarCallback);
                 }
             }
             else
             {
                 m_sFromUser = m_stStatusObj.User["screen_name"].ToString();
-                AsyncContentManager.GetManager().RequestImage(m_stStatusObj["profile_image_url"].ToString(), AvatarCallback);
+                AsyncContentManager.GetManager().RequestImage(m_stStatusObj.User["profile_image_url"].ToString(), AvatarCallback);
             }
 
             ttfTextField.TextElementClicked += new TweetTextField.TextElementClickHandler(ttfTextField_TextElementClicked);
@@ -79,8 +85,17 @@ namespace Twitter.Controls
             abConversation.Click += new EventHandler(abConversation_Click);
         }
 
+        private void UserLookup()
+        {
+            m_bAPI.LookupUser(UserLookupCallback, null, new List<string>(new string[] { m_sFromUser }));  //remove the @ from the beginning of the screen name
+        }
+
         private void UserLookupCallback(APICallbackArgs acArgs)
         {
+            //make a dummy status, give it the user object we have
+            m_stStatusObj.RetweetedStatus = new Status(new Json.JsonNode());
+            m_stStatusObj.RetweetedStatus.User = ((List<User>)acArgs.ResponseObject)[0];
+            AsyncContentManager.GetManager().RequestImage(m_stStatusObj.RetweetedStatus.User["profile_image_url"].ToString(), AvatarCallback);
         }
 
         private void AvatarCallback(object sender, Bitmap bmpAvatar, object objContext)

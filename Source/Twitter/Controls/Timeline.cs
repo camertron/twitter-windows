@@ -45,9 +45,9 @@ namespace Twitter.Controls
             get { return m_iTotalControlHeight; }
         }
 
-        public void Push(Status stToAdd)
+        public void Push(Status stToAdd, BasicAPI bAPI)
         {
-            TimelineStatus tsNewStatus = new TimelineStatus(stToAdd);
+            TimelineStatus tsNewStatus = new TimelineStatus(stToAdd, bAPI);
             TimelineStatus tsOldTop = null;
 
             if (m_stsControls.Count > 0)

@@ -24,13 +24,15 @@ namespace Twitter.API.Basic
             if (m_jnNode.ContainsKey("text") && m_jnNode["text"].IsString())
             {
                 m_stStatusText = StatusText.FromString(m_jnNode["text"].ToString());
-                m_bIsRetweet = (m_stStatusText.Words.Count > 0) && (m_stStatusText.Words[0].Type == StatusTextElement.StatusTextElementType.ScreenName);
-                m_bIsReply = (m_jnNode.ContainsKey("retweeted_status")) || (m_stStatusText.Words.Count > 0) && (m_stStatusText.Words[0].Text == "RT");
+                m_bIsReply = (m_stStatusText.Words.Count > 1) && (m_stStatusText.Words[0].Type == StatusTextElement.StatusTextElementType.ScreenName);
+                m_bIsRetweet = (m_jnNode.ContainsKey("retweeted_status")) || (m_stStatusText.Words.Count > 0) && (m_stStatusText.Words[0].Text.Trim() == "RT");
 
                 for (int i = 0; i < m_stStatusText.Words.Count; i++)
                 {
                     if (m_stStatusText.Words[i].Type == StatusTextElement.StatusTextElementType.ScreenName)
                         m_lsReplyNames.Add(m_stStatusText.Words[i].Text);
+                    else
+                        break;
                 }
             }
         }
@@ -49,6 +51,7 @@ namespace Twitter.API.Basic
 
                 return m_uUser;
             }
+            set { m_uUser = value; }
         }
 
         public Status RetweetedStatus

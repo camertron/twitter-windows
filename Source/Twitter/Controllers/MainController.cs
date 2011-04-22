@@ -35,7 +35,7 @@ namespace Twitter
             if (m_aclAccounts.ActiveAccount != null)
             {
                 //@TODO: uncomment for production
-                //m_aclAccounts.ActiveAccount.Connect();
+                m_aclAccounts.ActiveAccount.Connect();
             }
         }
 

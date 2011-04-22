@@ -149,7 +149,7 @@ namespace Twitter
 
         protected override void OnTweetReceived(Status stReceived)
         {
-            tmlTimeline.Push(stReceived);
+            tmlTimeline.Push(stReceived, Accounts.ActiveAccount.BasicAPI);
             UpdateScrollBar();
             OnResize(EventArgs.Empty);
         }
@@ -166,7 +166,7 @@ namespace Twitter
 
         protected override void OnReplyReceived(Status stReceived)
         {
-            tmlReplyTimeline.Push(stReceived);
+            tmlReplyTimeline.Push(stReceived, Accounts.ActiveAccount.BasicAPI);
             UpdateScrollBar();
             OnResize(EventArgs.Empty);
         }

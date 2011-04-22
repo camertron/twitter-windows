@@ -328,12 +328,6 @@ namespace Twitter.API
                 catch (Exception e) { }
             }
         }
-
-        public static void SynchronizeCall(string sFuncName, Object objToCall, params object[] aoArgs)
-        {
-            Type tObjToCallType = objToCall.GetType();
-            tObjToCallType.InvokeMember(sFuncName, System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, objToCall, aoArgs);
-        }
     }
 
     public class APICallbackArgs
