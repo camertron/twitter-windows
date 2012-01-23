@@ -21,6 +21,7 @@ namespace Twitter
         private StatusList m_slStatuses;
         private List<DirectMessage> m_ldmDirectMessages;
         private User m_uUserObject = null;
+        private Bitmap m_bmpAvatar;
 
         public Account(string sAccessToken, string sAccessSecret, string sUsername = "", string sPassword = "")
         {
@@ -92,6 +93,11 @@ namespace Twitter
             get { return m_ldmDirectMessages; }
         }
 
+        public Bitmap Avatar
+        {
+            get { return m_bmpAvatar; }
+            set { m_bmpAvatar = value; }
+        }
         public void ToFile(ref StreamWriter swWriter)
         {
             //write certain number of tweets and DMs out to disk, wrapped in account envelope

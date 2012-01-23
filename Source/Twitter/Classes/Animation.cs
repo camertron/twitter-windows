@@ -23,13 +23,15 @@ namespace Twitter
         private float m_fRise, m_fRun;
         private float m_fSlope;
         private float m_fYIntercept;
+        private float m_fSpeed;
 
-        public LinearMotionAnimation(Point ptStart, Point ptEnd, int iDuration, MotionType mtType = MotionType.Linear)
+        public LinearMotionAnimation(Point ptStart, Point ptEnd, int iDuration, MotionType mtType = MotionType.Linear, float fSpeed = 1)
         {
             m_ptStart = ptStart;
             m_ptEnd = ptEnd;
             m_iDuration = iDuration;
             m_mtMotionType = mtType;
+            m_fSpeed = fSpeed;
 
             m_fRise = ptEnd.Y - ptStart.Y;
             m_fRun = ptEnd.X - ptStart.X;
@@ -59,10 +61,12 @@ namespace Twitter
 
                 //ease in/out both map the percent progress to a parabolic percentage (x^2) between 0 and 1 inclusive
                 case MotionType.EaseOut:
-                    fPercentProgress = (float)Math.Pow((float)iElapsed / (float)m_iDuration, 5);
+                    fPercentProgress = ((float)iElapsed / (float)m_iDuration) * (float)(Math.PI / 2.0d * m_fSpeed);
+                    fPercentProgress = (float)Math.Cos(m_fSpeed * fPercentProgress);
                     break;
                 case MotionType.EaseIn:
-                    fPercentProgress = ((float)Math.Pow((float)iElapsed / (float)m_iDuration, (1.0f / 4.0f)));  //fourth root
+                    fPercentProgress = ((float)iElapsed / (float)m_iDuration) * (float)(Math.PI / 2.0d * m_fSpeed);
+                    fPercentProgress = (float)Math.Sin(m_fSpeed * fPercentProgress);
                     break;
             }
 

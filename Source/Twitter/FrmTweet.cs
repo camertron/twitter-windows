@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using WildMouse.SmoothControls;
 
 namespace Twitter
 {
@@ -16,8 +17,9 @@ namespace Twitter
         public event TweetClickedEventHandler TweetClicked;
         public event EventHandler CancelClicked;
 
-        private Color m_clrWithinLimit = Color.Black;
+        private Color m_clrWithinLimit = Color.FromArgb(224, 224, 224);
         private Color m_clrExceededLimit = Color.Red;
+        private Bitmap m_bmpAvatar;
 
         public FrmTweet()
         {
@@ -25,6 +27,18 @@ namespace Twitter
 
             this.FormClosing += new FormClosingEventHandler(FrmTweet_FormClosing);
             ttfTextField.TextChanged += new EventHandler(ttfTextField_TextChanged);
+        }
+
+        public Bitmap Avatar
+        {
+            get { return (Bitmap)m_bmpAvatar; }
+            set
+            {
+                m_bmpAvatar = value;
+
+                if (m_bmpAvatar != null)
+                    pbAvatar.Image = (Image)Imaging.RoundAvatarCorners(value);
+            }
         }
 
         protected override void OnActivated(EventArgs e)
@@ -67,7 +81,7 @@ namespace Twitter
             ttfTextField.SelectionStart = sInitText.Length;
             ttfTextField.UpdateText();
             UpdateLetterCount();
- 
+
             return base.ShowDialog();
         }
 
@@ -85,7 +99,7 @@ namespace Twitter
         {
             //do some validation
             if (ttfTextField.Text.Length > Literals.C_TWEET_MAX_CHARS)
-                MessageBox.Show("Message must be fewer than " + Literals.C_TWEET_MAX_CHARS.ToString() + " characters.", "Tweet too long", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                System.Windows.Forms.MessageBox.Show("Message must be fewer than " + Literals.C_TWEET_MAX_CHARS.ToString() + " characters.", "Tweet too long", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             else
             {
                 this.Hide();

@@ -51,6 +51,7 @@ namespace Twitter
             tmlTimeline.FavoriteClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_FavoriteClicked);
             tmlTimeline.QuoteTweetClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_QuoteTweetClicked);
             tmlTimeline.ReplyClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_ReplyClicked);
+            this.MouseMove += new MouseEventHandler(FrmMain_MouseMove);
 
             m_ftTweetForm.TweetClicked += new FrmTweet.TweetClickedEventHandler(m_ftTweetForm_TweetClicked);
             tsbTimelineScroller.Scroll += new ScrollEventHandler(tsbTimelineScroller_Scroll);
@@ -59,8 +60,12 @@ namespace Twitter
             //@TODO: do this for testing purposes only
             //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
             //for (int i = 0; i < utLine.Statuses.Count; i++)
-               // Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
-                //tmlTimeline.Push(utLine.Statuses[i]);
+                //Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+        }
+
+        private void FrmMain_MouseMove(object sender, MouseEventArgs e)
+        {
+            this.Text = e.X.ToString() + ", " + e.Y.ToString();
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
@@ -95,11 +100,13 @@ namespace Twitter
 
         private void tmlTimeline_ReplyClicked(object sender, TimelineStatus tsControl, Status stStatus)
         {
-            m_ftTweetForm.ShowDialog("@" + stStatus.User["screen_name"].ToString() + ": ");
+            m_ftTweetForm.Avatar = m_aclAccounts.ActiveAccount.Avatar;
+            m_ftTweetForm.ShowDialog("@" + stStatus.User["screen_name"].ToString() + " ");
         }
 
         private void tmlTimeline_QuoteTweetClicked(object sender, TimelineStatus tsControl, Status stStatus)
         {
+            m_ftTweetForm.Avatar = m_aclAccounts.ActiveAccount.Avatar;
             m_ftTweetForm.ShowDialog("\"@" + stStatus.User["screen_name"].ToString() + ": " + stStatus["text"].ToString() + "\"");
         }
 

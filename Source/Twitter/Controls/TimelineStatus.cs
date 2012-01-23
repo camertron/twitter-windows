@@ -15,7 +15,6 @@ namespace Twitter.Controls
 {
     public partial class TimelineStatus : UserControl
     {
-        private const int C_AVATAR_DIMENSIONS = 48;
         private const int C_CONTROL_MARGIN = 10;
         private const int C_AVATAR_TEXT_MARGIN = 10;
         private const int C_AVATAR_HEIGHT = 48;
@@ -110,10 +109,10 @@ namespace Twitter.Controls
         {
             //for some reason, a few of the avatars are weird sizes (I'm looking at you, TechCrunch)
             //this code resizes the avatar before its displayed so nothing overlaps and looks weird
-            Bitmap bmpResized = new Bitmap(C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
+            Bitmap bmpResized = new Bitmap(Literals.C_AVATAR_DIMENSIONS, Literals.C_AVATAR_DIMENSIONS);
 
             using (Graphics gCanvas = Graphics.FromImage(bmpResized))
-                gCanvas.DrawImage(bmpAvatar, 0, 0, C_AVATAR_DIMENSIONS, C_AVATAR_DIMENSIONS);
+                gCanvas.DrawImage(bmpAvatar, 0, 0, Literals.C_AVATAR_DIMENSIONS, Literals.C_AVATAR_DIMENSIONS);
 
             m_bmpAvatar = Imaging.RoundAvatarCorners(bmpResized);
             this.Invalidate();  //force redraw
@@ -202,6 +201,14 @@ namespace Twitter.Controls
             abFavorite.Visible = true;
             abReply.Visible = true;
             abRetweet.Visible = true;
+
+            //disable action buttons for other timeline statuses in the parent control
+            //this is definitely a little brute-force, but I can't think of any other way to do it :(
+            for (int i = 0; i < this.Parent.Controls.Count; i ++)
+            {
+                if ((this.Parent.Controls[i].GetType() == typeof(TimelineStatus)) && (this.Parent.Controls[i] != this))
+                    ((TimelineStatus)this.Parent.Controls[i]).HideActionButtons();
+            }
         }
 
         protected override void OnMouseLeave(EventArgs e)
@@ -209,19 +216,22 @@ namespace Twitter.Controls
             Point ptMouse = this.PointToClient(Cursor.Position);
 
             if (!(((ptMouse.X > 0) && (ptMouse.X < this.Width)) && ((ptMouse.Y > 0) && (ptMouse.Y < this.Height))))
-            {
-                abConversation.Visible = m_bDisplayConversationButton;
-                abFavorite.Visible = false;
-                abReply.Visible = false;
-                abRetweet.Visible = false;
-            }
+                HideActionButtons();
+        }
+
+        public void HideActionButtons()
+        {
+            abConversation.Visible = m_bDisplayConversationButton;
+            abFavorite.Visible = false;
+            abReply.Visible = false;
+            abRetweet.Visible = false;
         }
 
         protected override void OnResize(EventArgs e)
         {
             UpdateStatusButtons();
 
-            ttfTextField.Left = C_AVATAR_DIMENSIONS + (C_CONTROL_MARGIN * 2);
+            ttfTextField.Left = Literals.C_AVATAR_DIMENSIONS + (C_CONTROL_MARGIN * 2);
             ttfTextField.Top = C_CONTROL_MARGIN + C_FROM_USER_HEIGHT;
             ttfTextField.Width = this.Width - (ttfTextField.Left + C_CONTROL_MARGIN);
             //ttfTextField.Height set automatically
@@ -263,7 +273,7 @@ namespace Twitter.Controls
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            int iX = C_CONTROL_MARGIN + C_AVATAR_DIMENSIONS + C_AVATAR_TEXT_MARGIN;
+            int iX = C_CONTROL_MARGIN + Literals.C_AVATAR_DIMENSIONS + C_AVATAR_TEXT_MARGIN;
             int iY = C_CONTROL_MARGIN;
 
             e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;

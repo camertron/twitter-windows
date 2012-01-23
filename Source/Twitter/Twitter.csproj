@@ -35,10 +35,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Gradient">
+      <HintPath>..\..\..\SmoothControls\SmoothControls\bin\Release\Gradient.dll</HintPath>
+    </Reference>
     <Reference Include="Hammock">
       <HintPath>..\..\Libs\Hammock\bin\lib\3.5\Hammock.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.JScript" />
+    <Reference Include="SmoothControls">
+      <HintPath>..\..\..\SmoothControls\SmoothControls\bin\Release\SmoothControls.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />

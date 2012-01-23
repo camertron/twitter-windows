@@ -16,7 +16,7 @@ namespace Twitter
     [System.ComponentModel.DesignerCategory("")]
     public class MainController : Form
     {
-        private AccountList m_aclAccounts;
+        protected AccountList m_aclAccounts;
 
         public MainController() : base()
         {
@@ -48,6 +48,7 @@ namespace Twitter
 
         private void AccountGetAvatarCallback(object sender, Bitmap bmpImage, object objContext)
         {
+            ((Account)objContext).Avatar = bmpImage;
             OnAccountSetAvatar(m_aclAccounts.IndexOf((Account)objContext), Imaging.RoundAvatarCorners(bmpImage));
         }
 
