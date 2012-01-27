@@ -12,7 +12,10 @@ namespace Twitter
 {
     public partial class FrmPreferences : Form
     {
+        public delegate void CredentialsRemovedHandler(object sender, string sScreenName);
+
         public event FrmAddAccount.OAuthDanceHandler CredentialsAdded;
+        public event CredentialsRemovedHandler CredentialsRemoved;
 
         private FrmAddAccount m_faAddForm;
         private AccountList m_alAccountList;
@@ -23,6 +26,13 @@ namespace Twitter
         {
             InitializeComponent();
             m_faAddForm = new FrmAddAccount();
+
+            lbAccounts.SelectedValueChanged += new EventHandler(lbAccounts_SelectedValueChanged);
+        }
+
+        private void lbAccounts_SelectedValueChanged(object sender, EventArgs e)
+        {
+            btnRemove.Enabled = true;
         }
 
         public AccountList AccountList
@@ -82,6 +92,13 @@ namespace Twitter
 
         private void btnRemove_Click(object sender, EventArgs e)
         {
+            if (lbAccounts.SelectedIndex > -1)
+            {
+                if (CredentialsRemoved != null)
+                    CredentialsRemoved(this, lbAccounts.SelectedItem.ToString());
+
+                lbAccounts.Items.RemoveAt(lbAccounts.SelectedIndex);
+            }
         }
     }
 }

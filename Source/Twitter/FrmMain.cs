@@ -56,6 +56,7 @@ namespace Twitter
 
             //preference form event hookups
             m_fpPrefForm.CredentialsAdded += new FrmAddAccount.OAuthDanceHandler(m_fpPrefForm_CredentialsAdded);
+            m_fpPrefForm.CredentialsRemoved += new FrmPreferences.CredentialsRemovedHandler(m_fpPrefForm_CredentialsRemoved);
             m_fpPrefForm.AccountList = TwitterController.GetController().Accounts;
 
             //form event hookups
@@ -63,12 +64,29 @@ namespace Twitter
             tsbTimelineScroller.Scroll += new ScrollEventHandler(tsbTimelineScroller_Scroll);
             tmlTimeline.ScrolledToTop = true;
 
+            if (m_twController.Accounts.Count == 0)
+                tmlTimeline.DisableLoadingAnimation();
+
             //@TODO: do this for testing purposes only
             if (Literals.C_ENVIRONMENT == Env.Development)
             {
                 UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets2.json").Root.ToList());
                 for (int i = 0; i < utLine.Statuses.Count; i++)
                     Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+            }
+        }
+
+        private void m_fpPrefForm_CredentialsRemoved(object sender, string sScreenName)
+        {
+            AccountList alAccounts = TwitterController.GetController().Accounts;
+
+            for (int i = 0; i < alAccounts.Count; i++)
+            {
+                if (alAccounts[i].Credentials.ClientUsername == sScreenName)
+                {
+                    alAccounts.RemoveAt(i);
+                    alAccounts.Save();
+                }
             }
         }
 

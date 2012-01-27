@@ -76,11 +76,10 @@ namespace Twitter.Controls
             UpdateLayout();
         }
 
-        private void DisableLoadingAnimation()
+        public void DisableLoadingAnimation()
         {
             lblLoadingTweets.Visible = false;
             pbLoadingAnimation.Visible = false;
-            pbLoadingAnimation.Image = null;
         }
 
         private void HookupStatusEvents(TimelineStatus tsNewStatus)
