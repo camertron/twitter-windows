@@ -5,9 +5,14 @@ using System.Text;
 using System.IO;
 using System.Drawing;
 using System.Threading;
+using System.IO;
+using System.IO.IsolatedStorage;
 using Twitter.API;
 using Twitter.API.Streaming;
 using Twitter.API.Basic;
+using Twitter.API.OAuth;
+using Twitter.Json;
+using Hammock.Authentication.OAuth;
 
 namespace Twitter
 {
@@ -22,14 +27,25 @@ namespace Twitter
         private List<DirectMessage> m_ldmDirectMessages;
         private User m_uUserObject = null;
         private Bitmap m_bmpAvatar;
+        private OAuthCredentials m_oaCredentials;
 
-        public Account(string sAccessToken, string sAccessSecret, string sUsername = "", string sPassword = "")
+        public Account(OAuthCredentials oaCredentials)
+        {
+            m_oaCredentials = oaCredentials;
+            Initialize();
+        }
+
+        public Account(string sAccessKey, string sAccessSecret, string sUsername, string sPassword)
+        {
+            m_oaCredentials = OAuthAPI.GetCredentials(sAccessKey, sAccessSecret, sUsername, sPassword);
+            Initialize();
+        }
+
+        private void Initialize()
         {
             //construct and authenticate streaming/basic APIs
-            m_bAPI = new BasicAPI(Literals.C_CONSUMER_KEY, Literals.C_CONSUMER_SECRET);
-            m_sAPI = new StreamingAPI(Literals.C_CONSUMER_KEY, Literals.C_CONSUMER_SECRET);
-            m_bAPI.Authenticate(sAccessToken, sAccessSecret, sUsername, sPassword);
-            m_sAPI.Authenticate(sAccessToken, sAccessSecret, sUsername, sPassword);
+            m_bAPI = new BasicAPI(m_oaCredentials);
+            m_sAPI = new StreamingAPI(m_oaCredentials);
 
             m_slStatuses = new StatusList();
             m_ldmDirectMessages = new List<DirectMessage>();
@@ -98,9 +114,25 @@ namespace Twitter
             get { return m_bmpAvatar; }
             set { m_bmpAvatar = value; }
         }
-        public void ToFile(ref StreamWriter swWriter)
+
+        public OAuthCredentials Credentials
         {
-            //write certain number of tweets and DMs out to disk, wrapped in account envelope
+            get { return m_oaCredentials; }
+        }
+
+        public string ToJson()
+        {
+            string sScreenName;
+
+            if (m_uUserObject == null)
+                sScreenName = m_oaCredentials.ClientUsername;
+            else
+                sScreenName = m_uUserObject["screen_name"].ToString();
+
+            string sJsonStr = "{access_token: '" + Security.ProtectString(m_oaCredentials.Token) + "', ";
+            sJsonStr += "access_secret: '" + Security.ProtectString(m_oaCredentials.TokenSecret) + "', ";
+            sJsonStr += "screen_name: '" + sScreenName + "'}";
+            return sJsonStr;
         }
     }
 
@@ -136,6 +168,9 @@ namespace Twitter
         {
             base.Add(actNew);
             HookupNewAccount(actNew);
+
+            if (base.Count == 1)
+                m_iActiveAccountIndex = 0;
 
             if (AccountAdded != null)
                 AccountAdded(this, actNew);
@@ -218,30 +253,56 @@ namespace Twitter
 
         //@TODO
         //this will eventually read a much more complicated file
-        public void LoadFromFile(string sFile)
+        public void LoadFromStream(Stream stmReader)
         {
-            if (File.Exists(sFile))
-            {
-                StreamReader srReader = new StreamReader(sFile);
-                string sAccessToken = srReader.ReadLine();
-                string sAccessSecret = srReader.ReadLine();
+            JsonDocument jsDoc = JsonParser.GetParser().ParseStream(new StreamReader(stmReader));
 
-                this.Add(sAccessToken, sAccessSecret, "camertron");
-                srReader.Close();
+            if (jsDoc != null)
+            {
+                List<JsonObject> ljoUsers = jsDoc.Root.ToList();
+
+                for (int i = 0; i < ljoUsers.Count; i++)
+                {
+                    JsonNode jnCredentials = ljoUsers[i].ToNode();
+                    this.Add(new Account(Security.UnprotectString(jnCredentials["access_token"].ToString()), Security.UnprotectString(jnCredentials["access_secret"].ToString()), jnCredentials["screen_name"].ToString(), ""));
+                }
             }
         }
 
-        //@TODO
-        public void ToFile(string sFile)
+        public string ToJson()
         {
-            StreamWriter swWriter = new StreamWriter(sFile);
-
-            //write data members for AccountList here (there might not be any)
+            StringBuilder sbJsonStr = new StringBuilder("[");
 
             for (int i = 0; i < base.Count; i ++)
-                base[i].ToFile(ref swWriter);
+                sbJsonStr.Append(base[i].ToJson());
 
-            swWriter.Close();
+            sbJsonStr.Append("]");
+            return sbJsonStr.ToString();
+        }
+
+        public void WriteToStream(Stream stmWriter)
+        {
+            byte[] baBytes = Encoding.UTF8.GetBytes(ToJson());
+            stmWriter.Write(baBytes, 0, baBytes.Length);
+        }
+
+        public void Save()
+        {
+            IsolatedStorageFileStream isfStream = IsolatedStorageManager.GetManager().Store.OpenFile(Literals.C_ACCOUNT_FILE, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
+            WriteToStream(isfStream);
+            isfStream.Close();
+        }
+
+        public void Load()
+        {
+            IsolatedStorageManager isManager = IsolatedStorageManager.GetManager();
+
+            if (isManager.Store.FileExists(Literals.C_ACCOUNT_FILE))
+            {
+                IsolatedStorageFileStream isfStream = IsolatedStorageManager.GetManager().Store.OpenFile(Literals.C_ACCOUNT_FILE, FileMode.OpenOrCreate, FileAccess.Read);
+                LoadFromStream(isfStream);
+                isfStream.Close();
+            }
         }
     }
 }

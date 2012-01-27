@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Hammock.Web
 {
-#if !Smartphone
+#if !Smartphone && !NETCF
     [DebuggerDisplay("{Name}:{Value}")]
 #endif
 #if !Silverlight

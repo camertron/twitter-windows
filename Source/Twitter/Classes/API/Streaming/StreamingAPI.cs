@@ -11,11 +11,10 @@ namespace Twitter.API.Streaming
 {
     public class StreamingAPI : BaseAPI
     {
-        public StreamingAPI(string sConsumerKey, string sConsumerSecret) : base(sConsumerKey, sConsumerSecret) { }
+        public StreamingAPI(OAuthCredentials oaCredentials) : base(oaCredentials) { }
 
         public UserStream GetUserStream()
         {
-            CheckAuthenticated();
             return new UserStream(m_oaCredentials);
         }
     }

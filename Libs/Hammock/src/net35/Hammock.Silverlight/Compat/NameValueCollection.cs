@@ -33,6 +33,15 @@ namespace Hammock.Silverlight.Compat
 
         public void Add(string name, string value)
         {
+            List<KeyValuePair<string, string>> list = this;
+            for (int i = Count - 1; i >= 0; --i)
+            {
+                if (string.Equals(list[i].Key, name))
+                {
+                    list[i] = new KeyValuePair<string, string>(name, list[i].Value + "," + value);
+                    return;
+                }
+            }
             Add(new KeyValuePair<string, string>(name, value));
         }
 

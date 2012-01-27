@@ -9,14 +9,14 @@ namespace Hammock.Attributes.Validation
     public class BooleanToIntegerAttribute : ValidationAttribute
     {
         public override string TransformValue(PropertyInfo property, object value)
-        {
-#if !Smartphone
+      {
+#if !Smartphone && !NETCF
             bool result;
             return bool.TryParse(value.ToString(), out result)
                        ? result ? "1" : "0"
                        : base.TransformValue(property, value);
 #else
-            try
+        try
             {
                 var result = bool.Parse(value.ToString());
                 return result ? "1" : "0";

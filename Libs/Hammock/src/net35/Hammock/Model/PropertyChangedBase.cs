@@ -1,12 +1,16 @@
 using System;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace Hammock.Model
 {
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public class PropertyChangedBase : INotifyPropertyChanged
+#if !Smartphone && !NET20 && !ClientProfiles && !NETCF
+    [DataContract]
+#endif
+  public class PropertyChangedBase : INotifyPropertyChanged
     {
         #region INotifyPropertyChanged Members
 

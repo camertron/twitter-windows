@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Twitter</RootNamespace>
     <AssemblyName>Twitter</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -34,21 +34,20 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Twitter.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gradient">
-      <HintPath>..\..\..\SmoothControls\SmoothControls\bin\Release\Gradient.dll</HintPath>
-    </Reference>
-    <Reference Include="Hammock">
-      <HintPath>..\..\Libs\Hammock\bin\lib\3.5\Hammock.dll</HintPath>
+    <Reference Include="Hammock, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libs\Hammock\bin\lib\4.0\Hammock.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.JScript" />
-    <Reference Include="SmoothControls">
-      <HintPath>..\..\..\SmoothControls\SmoothControls\bin\Release\SmoothControls.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -58,9 +57,12 @@
     <Compile Include="Classes\Animation.cs" />
     <Compile Include="Classes\API\BaseAPI.cs" />
     <Compile Include="Classes\API\Basic\DirectMessage.cs" />
+    <Compile Include="Classes\IsolatedStorageManager.cs" />
+    <Compile Include="Classes\API\OAuth\OAuthAPI.cs" />
     <Compile Include="Classes\API\ScaffoldObject.cs" />
     <Compile Include="Classes\API\Exceptions.cs" />
     <Compile Include="Classes\API\StatusText.cs" />
+    <Compile Include="Classes\Security.cs" />
     <Compile Include="Classes\Json\FSA.cs" />
     <Compile Include="Classes\Json\JsonDocument.cs" />
     <Compile Include="Classes\Json\JsonNode.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="Classes\AsyncContentManager.cs" />
     <Compile Include="Classes\Imaging.cs" />
     <Compile Include="Classes\ResourceManager.cs" />
+    <Compile Include="Classes\TwitterController.cs" />
     <Compile Include="Controls\ActionButton.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -113,6 +116,12 @@
     </Compile>
     <Compile Include="Controls\TweetTextField.Designer.cs">
       <DependentUpon>TweetTextField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmAddAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAddAccount.Designer.cs">
+      <DependentUpon>FrmAddAccount.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
@@ -154,6 +163,9 @@
     <EmbeddedResource Include="Controls\TweetTextField.resx">
       <DependentUpon>TweetTextField.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmAddAccount.resx">
+      <DependentUpon>FrmAddAccount.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -190,6 +202,17 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\retweet-indicator-small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\tweet-dogear-favorite.png" />
+    <EmbeddedResource Include="Resources\tweet-dogear-favorite-retweet.png" />
+    <EmbeddedResource Include="Resources\tweet-dogear-retweet.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\loading-animation.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Twitter.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

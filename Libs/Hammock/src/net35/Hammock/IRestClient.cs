@@ -1,10 +1,18 @@
 ﻿using System;
 
+#if NET40
+using System.Dynamic;
+#endif
+
 namespace Hammock
 {
     public interface IRestClient
     {
 #if !Silverlight
+
+#if NET40
+        RestResponse<dynamic> RequestDynamic(RestRequest request);
+#endif
         RestResponse Request(RestRequest request);
         RestResponse Request();
         
@@ -15,13 +23,20 @@ namespace Hammock
 #if !WindowsPhone
         IAsyncResult BeginRequest();
         IAsyncResult BeginRequest<T>();
-
+        
         IAsyncResult BeginRequest(RestRequest request, RestCallback callback);
         IAsyncResult BeginRequest(RestRequest request, RestCallback callback, object userState);
 
         IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback);
         IAsyncResult BeginRequest<T>(RestRequest request, RestCallback<T> callback, object userState);
-        
+
+#if NET40
+        IAsyncResult BeginRequestDynamic();
+        IAsyncResult BeginRequestDynamic(RestRequest request, RestCallback<dynamic> callback);
+        IAsyncResult BeginRequestDynamic(RestRequest request, RestCallback<dynamic> callback, object userState);
+        RestResponse<dynamic> EndRequestDynamic(IAsyncResult result);
+#endif
+
         IAsyncResult BeginRequest(RestRequest request);
         IAsyncResult BeginRequest(RestRequest request, object userState);
         IAsyncResult BeginRequest<T>(RestRequest request);
@@ -29,7 +44,7 @@ namespace Hammock
         
         IAsyncResult BeginRequest(RestCallback callback);
         IAsyncResult BeginRequest<T>(RestCallback<T> callback);
-
+        
         RestResponse EndRequest(IAsyncResult result);
         RestResponse<T> EndRequest<T>(IAsyncResult result);
 #else

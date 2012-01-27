@@ -46,9 +46,10 @@ namespace Hammock.Authentication.OAuth
             var workflow = new OAuthWorkflow(credentials);
             var uri = new Uri(client.Authority);
             var realm = uri.Host;
+            var enableTrace = client.TraceEnabled || request.TraceEnabled;
 
             var info = workflow.BuildProtectedResourceInfo(method, request.GetAllHeaders(), url);
-            var query = credentials.GetQueryFor(url, request, info, method);
+            var query = credentials.GetQueryFor(url, request, info, method, enableTrace);
             ((OAuthWebQuery) query).Realm = realm;
             var auth = query.GetAuthorizationContent();
 
@@ -153,7 +154,8 @@ namespace Hammock.Authentication.OAuth
         public virtual WebQuery GetQueryFor(string url, 
                                             WebParameterCollection parameters, 
                                             IWebQueryInfo info, 
-                                            WebMethod method)
+                                            WebMethod method,
+                                            bool enableTrace)
         {
             OAuthWebQueryInfo oauth;
 
@@ -197,12 +199,12 @@ namespace Hammock.Authentication.OAuth
                     throw new ArgumentOutOfRangeException();
             }
 
-            return new OAuthWebQuery(oauth);
+            return new OAuthWebQuery(oauth, enableTrace);
         }
 
-        public virtual WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method)
+        public virtual WebQuery GetQueryFor(string url, RestBase request, IWebQueryInfo info, WebMethod method, bool enableTrace)
         {
-            var query = GetQueryFor(url, request.Parameters, info, method);
+            var query = GetQueryFor(url, request.Parameters, info, method, enableTrace);
             request.Method = method;
             return query;
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using Twitter.Json;
 
 namespace Twitter.API
 {
@@ -19,11 +20,10 @@ namespace Twitter.API
 
         private StatusText() { }
 
-        public static StatusText FromString(string sFromStr)
+        public static StatusText FromString(string sFromStr, List<JsonObject> ljnUrls = null)
         {
             StatusText stFinal = new StatusText();
-            stFinal.m_ltstWords = StatusTextElement.ListFromString(sFromStr);
-            stFinal.m_sText = sFromStr;
+            stFinal.m_ltstWords = StatusTextElement.ListFromString(sFromStr, ljnUrls);
 
             return stFinal;
         }
@@ -72,7 +72,7 @@ namespace Twitter.API
                         sbFinal.Append("\\cf1 "); break;  //normal case
                 }
 
-                sbFinal.Append(GetRTFUnicodeEscapedString(m_ltstWords[i].Text));
+                sbFinal.Append(GetRTFUnicodeEscapedString(m_ltstWords[i].DisplayText));
             }
 
             //ending body curly
@@ -111,6 +111,19 @@ namespace Twitter.API
         {
             get { return m_sText; }
         }
+
+        public int Length
+        {
+            get
+            {
+                int iLength = 0;
+
+                for (int i = 0; i < m_ltstWords.Count; i++)
+                    iLength += m_ltstWords[i].Length;
+
+                return iLength;
+            }
+        }
     }
 
     public class StatusTextElement
@@ -124,9 +137,13 @@ namespace Twitter.API
         }
 
         private static char[] c_acSplitters = new char[1] { ' ' };
-        private const string C_TWEET_SPLIT_REGEX = @"(@\w+)|(#\w+)|(http\:\/\/[^\s]+)";
+        private const string C_TWEET_SPLIT_REGEX = @"(@\w+)|(#\w+)|(https?\:\/\/[^\s]+)";
+        private const string C_URL_REGEX = "https?://.*";
+        private const int C_MAX_URL_LENGTH = 30;
+        private const int C_SHORTENED_URL_LENGTH = 20;
 
         private string m_sText;
+        private string m_sDisplayText;
         private StatusTextElementType m_teType;
         private int m_iCharStart;
         private int m_iCharEnd;
@@ -139,7 +156,11 @@ namespace Twitter.API
         public string Text
         {
             get { return m_sText; }
-            set { m_sText = value; }
+        }
+
+        public string DisplayText
+        {
+            get { return m_sDisplayText; }
         }
 
         public StatusTextElementType Type
@@ -159,9 +180,48 @@ namespace Twitter.API
             set { m_iCharEnd = value; }
         }
 
-        public static List<StatusTextElement> ListFromString(string sToParse)
+        public int Length
         {
-            //string[] asWords = sToParse.Split(c_acSplitters);
+            get
+            {
+                switch (m_teType)
+                {
+                    case StatusTextElementType.URL:
+                        return C_SHORTENED_URL_LENGTH;
+                    default:
+                        return m_sText.Length;
+                }
+            }
+        }
+
+        private static string ExpandUrl(string sUrlText, List<JsonObject> ljoUrls)
+        {
+            JsonNode jnUrlNode;
+
+            for (int u = 0; u < ljoUrls.Count; u++)
+            {
+                if (ljoUrls[u].IsNode())
+                {
+                    jnUrlNode = ljoUrls[u].ToNode();
+
+                    if (jnUrlNode.ContainsKey("url") && jnUrlNode["url"].ToString() == sUrlText)
+                    {
+                        if (jnUrlNode["expanded_url"] != null)
+                        {
+                            if (jnUrlNode["expanded_url"].ToString().Length > C_MAX_URL_LENGTH)
+                                return jnUrlNode["expanded_url"].ToString().Substring(0, C_MAX_URL_LENGTH) + "...";
+                            else
+                                return jnUrlNode["expanded_url"].ToString();
+                        }
+                    }
+                }
+            }
+
+            return sUrlText;
+        }
+
+        public static List<StatusTextElement> ListFromString(string sToParse, List<JsonObject> ljoUrls = null)
+        {
             string[] asWords = Regex.Split(sToParse, C_TWEET_SPLIT_REGEX);
             StatusTextElement tstCurElement;
             List<StatusTextElement> ltstFinal = new List<StatusTextElement>();
@@ -171,11 +231,18 @@ namespace Twitter.API
             {
                 tstCurElement = new StatusTextElement()
                 {
-                    m_sText = asWords[i]
+                    m_sText = asWords[i],
+                    m_sDisplayText = asWords[i]
                 };
 
-                if (asWords[i].Contains("http://"))
+                if (Regex.IsMatch(asWords[i], C_URL_REGEX))
+                {
                     tstCurElement.m_teType = StatusTextElementType.URL;
+
+                    //find URL
+                    if (ljoUrls != null)
+                        tstCurElement.m_sDisplayText = ExpandUrl(tstCurElement.m_sText, ljoUrls);
+                }
                 else if ((asWords[i].Length > 0) && (asWords[i][0] == '@'))
                     tstCurElement.m_teType = StatusTextElementType.ScreenName;
                 else if ((asWords[i].Length > 0) && (asWords[i][0] == '#'))

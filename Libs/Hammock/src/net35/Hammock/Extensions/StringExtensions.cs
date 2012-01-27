@@ -12,7 +12,7 @@ using System.Windows.Browser;
 using System.Web;
 #endif
 
-#if !SILVERLIGHT && !MonoTouch
+#if !SILVERLIGHT && !MonoTouch && !NETCF
 using System.Web;
 #endif
 
@@ -112,6 +112,20 @@ namespace Hammock.Extensions
                 part => part.Split(new[] { '=' })).ToDictionary(
                     pair => pair[0], pair => pair[1]
                 );
+        }
+
+        public static bool TryParse(this string value, out double number)
+        {
+          try
+          {
+            number = double.Parse(value);
+            return true;
+          }
+          catch
+          {
+            number =  0;
+            return false;
+          }
         }
 
         private const RegexOptions Options =

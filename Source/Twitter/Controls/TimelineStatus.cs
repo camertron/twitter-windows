@@ -28,6 +28,8 @@ namespace Twitter.Controls
         private string m_sFromUser;
         private Status m_stStatusObj;
         private bool m_bDisplayConversationButton;
+        private bool m_bFavorite;
+        private bool m_bRetweet;
 
         private Bitmap m_bmpAvatar = null;
         private Font m_fntScreenNameFont;
@@ -60,7 +62,7 @@ namespace Twitter.Controls
 
             m_stStatusObj = stFrom;
             ttfTextField.UpdateFromStatus(m_stStatusObj);
-            Favorite = Boolean.Parse(stFrom["favorited"].ToString());
+            Favorite = Boolean.Parse(m_stStatusObj["favorited"].ToString());
 
             if (m_stStatusObj.IsRetweet)
             {
@@ -83,6 +85,11 @@ namespace Twitter.Controls
                 m_sFromUser = m_stStatusObj.User["screen_name"].ToString();
                 AsyncContentManager.GetManager().RequestImage(m_stStatusObj.User["profile_image_url"].ToString(), AvatarCallback);
             }
+
+            User uActiveUser = TwitterController.GetController().ActiveAccount.UserObject;
+
+            if (uActiveUser != null)
+                Retweet = m_stStatusObj.IsRetweet && (m_sFromUser == TwitterController.GetController().ActiveAccount.UserObject["screen_name"].ToString());
 
             ttfTextField.TextElementClicked += new TweetTextField.TextElementClickHandler(ttfTextField_TextElementClicked);
 
@@ -135,6 +142,7 @@ namespace Twitter.Controls
             if (FavoriteClicked != null)
                 FavoriteClicked(this, e);
 
+            Favorite = !Favorite;
             UpdateStatusButtons();
         }
 
@@ -147,6 +155,9 @@ namespace Twitter.Controls
         {
             if (RetweetClicked != null)
                 RetweetClicked(this, e);
+
+            Retweet = true;
+            UpdateStatusIcons();
         }
 
         private void tsmiQuoteTweet_Click(object sender, EventArgs e)
@@ -163,8 +174,24 @@ namespace Twitter.Controls
 
         public bool Favorite
         {
-            get { return pbFavoriteBadge.Visible; }
-            set { pbFavoriteBadge.Visible = value; }
+            get { return m_bFavorite; }
+            set
+            {
+                m_bFavorite = value;
+                UpdateStatusIcons();
+                UpdateStatusButtons();
+            }
+        }
+
+        public bool Retweet
+        {
+            get { return m_bRetweet; }
+            set
+            {
+                m_bRetweet = value;
+                UpdateStatusIcons();
+                UpdateStatusButtons();
+            }
         }
 
         public override Color BackColor
@@ -247,8 +274,8 @@ namespace Twitter.Controls
             else
                 this.Height = C_AVATAR_HEIGHT + (C_CONTROL_MARGIN * 2) + iExtraRetweetHeight;
 
-            pbFavoriteBadge.Left = this.Width - pbFavoriteBadge.Width;
-            pbFavoriteBadge.Top = 0;
+            pbDogear.Left = this.Width - pbDogear.Width;
+            pbDogear.Top = 0;
 
             base.OnResize(e);
         }
@@ -257,13 +284,39 @@ namespace Twitter.Controls
         {
             int iRtOffset = 10;
 
-            if (pbFavoriteBadge.Visible)
+            if (pbDogear.Visible)
                 iRtOffset += 10;
 
             abRetweet.Left = this.Width - (abRetweet.Width + iRtOffset);
             abFavorite.Left = abRetweet.Left - (abFavorite.Width + 5);
             abReply.Left = abFavorite.Left - (abReply.Width + 5);
             abConversation.Left = abReply.Left - (abConversation.Width + 5);
+        }
+
+        private void UpdateStatusIcons()
+        {
+            string sImage = null;
+
+            if (m_bFavorite)
+            {
+                if (m_bRetweet)
+                    sImage = "tweet-dogear-favorite-retweet.png";
+                else
+                    sImage = "tweet-dogear-favorite.png";
+            }
+            else
+            {
+                if (m_bRetweet)
+                    sImage = "tweet-dogear-retweet.png";
+            }
+
+            if (sImage != null)
+            {
+                pbDogear.Image = ResourceManager.GetManager().GetBitmap(sImage);
+                pbDogear.Visible = true;
+            }
+            else
+                pbDogear.Visible = false;
         }
 
         public void UpdateLayout()

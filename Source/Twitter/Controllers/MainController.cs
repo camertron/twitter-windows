@@ -16,27 +16,19 @@ namespace Twitter
     [System.ComponentModel.DesignerCategory("")]
     public class MainController : Form
     {
-        protected AccountList m_aclAccounts;
+        protected TwitterController m_twController;
 
         public MainController() : base()
         {
-            m_aclAccounts = new AccountList();
+            m_twController = TwitterController.GetController();
 
-            m_aclAccounts.AccountSwitched += new EventHandler(m_aclAccounts_AccountSwitched);
-            m_aclAccounts.AccountAdded += new AccountList.AccountHandler(m_aclAccounts_AccountAdded);
-            m_aclAccounts.AccountRemoved += new AccountList.AccountHandler(m_aclAccounts_AccountRemoved);
-            m_aclAccounts.UserObjectReceived += new AccountList.AccountHandler(m_aclAccounts_UserObjectReceived);
+            m_twController.Accounts.AccountSwitched += new EventHandler(m_aclAccounts_AccountSwitched);
+            m_twController.Accounts.AccountAdded += new AccountList.AccountHandler(m_aclAccounts_AccountAdded);
+            m_twController.Accounts.AccountRemoved += new AccountList.AccountHandler(m_aclAccounts_AccountRemoved);
+            m_twController.Accounts.UserObjectReceived += new AccountList.AccountHandler(m_aclAccounts_UserObjectReceived);
 
-            m_aclAccounts.LoadFromFile(Literals.C_ACCOUNT_FILE);
-
-            //connect default account and populate the timeline!
-            //this null check is necessary because this method is used by the forms designer
-            //as well as during runtime
-            if (m_aclAccounts.ActiveAccount != null)
-            {
-                //@TODO: uncomment for production
-                m_aclAccounts.ActiveAccount.Connect();
-            }
+            m_twController.Accounts.Load();
+            m_twController.ConnectActiveAccount();
         }
 
         #region Local Events
@@ -48,8 +40,11 @@ namespace Twitter
 
         private void AccountGetAvatarCallback(object sender, Bitmap bmpImage, object objContext)
         {
-            ((Account)objContext).Avatar = bmpImage;
-            OnAccountSetAvatar(m_aclAccounts.IndexOf((Account)objContext), Imaging.RoundAvatarCorners(bmpImage));
+            if (objContext != null)
+            {
+                ((Account)objContext).Avatar = bmpImage;
+                OnAccountSetAvatar(m_twController.Accounts.IndexOf((Account)objContext), Imaging.RoundAvatarCorners(bmpImage));
+            }
         }
 
         private void m_aclAccounts_AccountSwitched(object sender, EventArgs e) { OnAccountSwitched(); }
@@ -72,9 +67,9 @@ namespace Twitter
                 case UserStream.ReceiveType.Reply:
                     Status stNewTweet = new Status(jdData.Root.ToNode());
 
-                    if (!m_aclAccounts.ActiveAccount.Statuses.Contains(stNewTweet))
+                    if (!m_twController.ActiveAccount.Statuses.Contains(stNewTweet))
                     {
-                        m_aclAccounts.ActiveAccount.Statuses.Add(stNewTweet);
+                        m_twController.ActiveAccount.Statuses.Add(stNewTweet);
 
                         if (rtRcvType == UserStream.ReceiveType.Tweet)
                             OnTweetReceived(stNewTweet);
@@ -86,7 +81,7 @@ namespace Twitter
 
                 case UserStream.ReceiveType.DirectMessage:
                     DirectMessage dmNewMessage = new DirectMessage(jdData.Root.ToNode());
-                    m_aclAccounts.ActiveAccount.DirectMessages.Add(dmNewMessage);
+                    m_twController.ActiveAccount.DirectMessages.Add(dmNewMessage);
                     OnDirectMessageReceived(dmNewMessage);
                     break;
             }
@@ -107,7 +102,7 @@ namespace Twitter
 
         protected AccountList Accounts
         {
-            get { return m_aclAccounts; }
+            get { return m_twController.Accounts; }
         }
 
         protected void CallbackCheckSucceeded(string sMessage, string sTitle, APICallbackArgs acArgs)

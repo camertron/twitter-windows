@@ -6,22 +6,42 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Hammock.Authentication.OAuth;
 
 namespace Twitter
 {
     public partial class FrmPreferences : Form
     {
+        public event FrmAddAccount.OAuthDanceHandler CredentialsAdded;
+
+        private FrmAddAccount m_faAddForm;
+        private AccountList m_alAccountList;
         public event EventHandler CancelClicked;
         public event EventHandler OkClicked;
 
         public FrmPreferences()
         {
             InitializeComponent();
-
-            this.FormClosing += new FormClosingEventHandler(FrmPreferences_FormClosing);
+            m_faAddForm = new FrmAddAccount();
         }
 
-        private void FrmPreferences_FormClosing(object sender, FormClosingEventArgs e)
+        public AccountList AccountList
+        {
+            get { return m_alAccountList; }
+            set { m_alAccountList = value; }
+        }
+
+        public new DialogResult ShowDialog()
+        {
+            lbAccounts.Items.Clear();
+
+            for (int i = 0; i < m_alAccountList.Count; i++)
+                lbAccounts.Items.Add(m_alAccountList[i].Credentials.ClientUsername);
+
+            return base.ShowDialog();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
@@ -44,6 +64,24 @@ namespace Twitter
 
             if (OkClicked != null)
                 OkClicked(this, e);
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            OAuthCredentials oaCredentials = m_faAddForm.GetCredentials();
+
+            //GetCredentials() can return null if the user didn't complete the OAuth flow successfully
+            if (oaCredentials != null)
+            {
+                lbAccounts.Items.Add(oaCredentials.ClientUsername);
+
+                if (CredentialsAdded != null)
+                    CredentialsAdded(this, oaCredentials);
+            }
+        }
+
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
         }
     }
 }

@@ -40,28 +40,20 @@ namespace Hammock.Extensions
             }
         }
 
-        public static Uri UriMinusQuery(this Uri uri, out WebParameterCollection parameters)
+        public static string UriMinusQuery(string uri, WebParameterCollection parameters)
         {
-            var sb = new StringBuilder();
-
-            parameters = new WebParameterCollection();
-            var query = uri.Query.ParseQueryString();
+            int queryPos = uri.IndexOf('?');
+            if (queryPos < 0)
+            {
+                return uri;
+            }
+            var query = uri.Substring(queryPos + 1).ParseQueryString();
             foreach(var key in query.Keys)
             {
                 parameters.Add(key, query[key].UrlDecode());
             }
 
-            var port = uri.Scheme.Equals("http") && uri.Port != 80 || 
-                       uri.Scheme.Equals("https") && uri.Port != 443 ? 
-                       ":" + uri.Port : "";
-
-            sb.Append(uri.Scheme)
-                .Append("://")
-                .Append(uri.Host)
-                .Append(port)
-                .Append(uri.AbsolutePath);
-
-            return new Uri(sb.ToString());
+            return uri.Substring(0, queryPos);
         }
 
         public static string ToBasicAuthorizationHeader(string username, string password)

@@ -24,6 +24,23 @@ namespace Hammock
 #if !SILVERLIGHT
     [Serializable]
 #endif
+    public enum QueryHandling
+    {
+        /// <summary>
+        /// Query strings present in paths are left alone.
+        /// </summary>
+        None,
+        /// <summary>
+        /// Query string pairs present in paths are added to the parameter collection,
+        /// where they are appended back in the case of GET, HEAD, DELETE, and OPTIONS, or added to the
+        /// request body in the case of POST, or PUT.
+        /// </summary>
+        AppendToParameters
+    }
+
+#if !SILVERLIGHT
+    [Serializable]
+#endif
     public abstract class RestBase : PropertyChangedBase
     {
         private byte[] _postContent;
@@ -47,6 +64,7 @@ namespace Hammock
         protected virtual internal WebParameterCollection Parameters { get; set; }
         protected virtual internal WebParameterCollection Cookies { get; set; }
         protected virtual internal ICollection<HttpPostParameter> PostParameters { get; set; }
+        protected internal virtual bool TraceEnabled { get; set; }
         
         protected virtual internal byte[] PostContent
         {
@@ -64,6 +82,7 @@ namespace Hammock
             }
         }
 
+        public virtual Func<RestRequest, RestResponseBase, Type> GetErrorResponseEntityType { get; set; }
         public virtual string UserAgent { get; set; }
         public virtual WebMethod? Method { get; set; }
         public virtual IWebCredentials Credentials { get; set; }
@@ -86,6 +105,8 @@ namespace Hammock
         public virtual ServicePoint ServicePoint { get; set; }
         public virtual bool? FollowRedirects { get; set; }
 #endif
+
+        public virtual QueryHandling? QueryHandling { get; set; }
         public virtual string Proxy { get; set; }
         public virtual TimeSpan? Timeout { get; set; }
         public virtual string VersionPath { get; set; }
@@ -145,6 +166,7 @@ namespace Hammock
         public virtual IWebQueryInfo Info { get; set; }
         public virtual string Path { get; set; }
         public virtual object Tag { get; set; }
+        public virtual CookieContainer CookieContainer { get; set; }
 
         public virtual void AddHeader(string name, string value)
         {
@@ -156,11 +178,13 @@ namespace Hammock
             Parameters.Add(name, value);
         }
 
+        [Obsolete("Use CookieContainer instead.")]
         public virtual void AddCookie(string name, string value)
         {
             Cookies.Add(new HttpCookieParameter(name, value));
         }
 
+        [Obsolete("Use CookieContainer instead.")]
         public virtual void AddCookie(Uri domain, string name, string value)
         {
             Cookies.Add(new HttpCookieParameter(name, value) { Domain = domain });

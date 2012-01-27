@@ -145,6 +145,14 @@ namespace Twitter.Controls
             set { rtbTextBox.Text = value; }
         }
 
+        public int TextLength
+        {
+            get
+            {
+                return m_stStatusText.Length;
+            }
+        }
+
         private void rtbTextBox_TextChanged(object sender, EventArgs e)
         {
             UpdateText(rtbTextBox.Text);
@@ -176,7 +184,9 @@ namespace Twitter.Controls
         public void UpdateFromStatus(Status stStatus)
         {
             m_stStatusText = stStatus.StatusText;
+            m_bAlreadyUpdating = true;
             rtbTextBox.Rtf = m_stStatusText.ToRTF(m_fntFont);
+            m_bAlreadyUpdating = false;
         }
 
         public Color BorderColor

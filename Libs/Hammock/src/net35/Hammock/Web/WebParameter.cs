@@ -1,14 +1,14 @@
-#if !Smartphone
+#if !Smartphone && !NETCF
 using System.Diagnostics;
 #endif
 using System;
 namespace Hammock.Web
 {
-#if !Smartphone
+#if !Smartphone && !NETCF
     [DebuggerDisplay("{Name}:{Value}")]
 #endif
 #if !SILVERLIGHT
-    [Serializable]
+  [Serializable]
 #endif
     public class WebParameter : WebPair
     {

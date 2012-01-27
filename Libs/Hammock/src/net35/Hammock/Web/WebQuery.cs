@@ -35,7 +35,9 @@ namespace Hammock.Web
         public virtual string UserAgent { get; protected internal set; }
         public virtual WebHeaderCollection Headers { get; protected set; }
         public virtual WebParameterCollection Parameters { get; protected set; }
+        [Obsolete("Use CookieContainer instead.")]
         public virtual WebParameterCollection Cookies { get; protected set; }
+        public virtual CookieContainer CookieContainer { get; set; }
 
         private WebEntity _entity;
         protected internal virtual WebEntity Entity
@@ -63,8 +65,6 @@ namespace Hammock.Web
         public virtual bool HasElevatedPermissions { get; set; }
 
         // [DC]: Headers to use when access isn't direct
-        public virtual string SilverlightAuthorizationHeader { get; set; }
-        public virtual string SilverlightMethodHeader { get; set; }
         public virtual string SilverlightUserAgentHeader { get; set; }
         public virtual string SilverlightAcceptEncodingHeader { get; set; }        
 #endif
@@ -107,20 +107,25 @@ namespace Hammock.Web
         }
 #endif
 
-        protected WebQuery() : this(null)
+        protected WebQuery(bool enableTrace) : this(null, enableTrace)
         {
 
         }
 
-        protected WebQuery(IWebQueryInfo info)
+        protected WebQuery(IWebQueryInfo info, bool enableTrace)
         {
+            TraceEnabled = enableTrace;
             SetQueryMeta(info);
             InitializeResult();
         }
 
+        protected bool TraceEnabled { get; private set; }
+
         private void SetQueryMeta(IWebQueryInfo info)
         {
+#pragma warning disable 618
             Cookies = new WebParameterCollection(0);
+#pragma warning restore 618
 
             if(info == null)
             {
@@ -158,7 +163,6 @@ namespace Hammock.Web
         private void SetResponseResults(WebQueryResponseEventArgs e)
         {
             Result.ContentStream = e.Response;
-            Result.ResponseDate = DateTime.UtcNow;
             Result.RequestHttpMethod = Method.ToUpper();
             Result.IsMock = WebResponse is MockHttpWebResponse;
             Result.TimedOut = TimedOut;
@@ -188,12 +192,21 @@ namespace Hammock.Web
             Result.ResponseLength = contentLength;
             Result.ResponseUri = responseUri;
             Result.Exception = e.Exception;
+            if (WebResponse != null)
+            {
+                Result.ResponseDate = DateTime.UtcNow;
+            }
         }
 
 #if !MonoTouch
 		[Conditional("TRACE")]
-        private static void TraceResponse(Uri uri, string version, System.Net.WebHeaderCollection headers, int statusCode, string statusDescription)
+        private void TraceResponse(Uri uri, string version, System.Net.WebHeaderCollection headers, int statusCode, string statusDescription)
         {
+            if(!TraceEnabled)
+            {
+                return;
+            }
+
             Trace.WriteLine(
                 String.Concat("\r\n--RESPONSE:", " ", uri)
                 );
@@ -220,7 +233,7 @@ namespace Hammock.Web
 #if !SILVERLIGHT
         protected virtual void SetWebProxy(WebRequest request)
         {
-#if !Smartphone
+#if !Smartphone && !NETCF
             var proxyUriBuilder = new UriBuilder(Proxy);
             request.Proxy = new WebProxy(proxyUriBuilder.Host,
                                          proxyUriBuilder.Port);
@@ -231,7 +244,7 @@ namespace Hammock.Web
                                                                                              proxyUriBuilder.Password);
             }
 #else
-            var uri = new Uri(Proxy);
+          var uri = new Uri(Proxy);
             request.Proxy = new WebProxy(uri.Host, uri.Port);
             var userParts = uri.UserInfo.Split(new[] { ':' }).Where(ui => !ui.IsNullOrBlank()).ToArray();
             if (userParts.Length == 2)
@@ -264,14 +277,21 @@ namespace Hammock.Web
 
             SetMethod(method.ToString(), request);
 
-            request.ContentType = "application/x-www-form-urlencoded";
+            // It should be possible to override the content type in the case of AddPostContent
+            var hasContentType = Headers.AllKeys.Where(
+                key => key.Equals("Content-Type", StringComparison.InvariantCultureIgnoreCase)
+                ).Count() > 0;
+            
+            if(!hasContentType)
+            {
+                request.ContentType = "application/x-www-form-urlencoded";
+            }
 
             HandleRequestMeta(request);
 			
 #if !MonoTouch
             TraceRequest(request);
 #endif
-			
             content = BuildPostOrPutContent(request, post);
 
 #if !SILVERLIGHT
@@ -283,11 +303,11 @@ namespace Hammock.Web
         protected virtual byte[] BuildPostOrPutContent(WebRequest request, string post)
         {
             var encoding = Encoding ?? Encoding.UTF8;
+
             var content = PostContent ?? encoding.GetBytes(post);
+
 #if TRACE
-            Trace.WriteLine(String.Concat(
-                "\r\n", content)
-                );            
+            Trace.WriteLineIf(TraceEnabled, string.Concat("\r\n", content));            
 #endif
 			return content;
         }
@@ -323,9 +343,7 @@ namespace Hammock.Web
 
                 request.ContentType = Entity.ContentType;
 #if TRACE
-                Trace.WriteLine(String.Concat(
-                    "\r\n", entity)
-                    );
+                Trace.WriteLineIf(TraceEnabled, string.Concat("\r\n", entity));
 #endif
                 
 #if !SILVERLIGHT 
@@ -369,20 +387,7 @@ namespace Hammock.Web
 
         private void SetMethod(string method, WebRequest request)
         {
-#if SILVERLIGHT && !WindowsPhone
-            var httpMethod = method.ToUpper();
-            if (HasElevatedPermissions)
-            {
-                request.Method = httpMethod;
-            }
-            else
-            {
-                request.Method = "POST";
-                request.Headers[SilverlightMethodHeader] = httpMethod;
-            }
-#else
             request.Method = method.ToUpper();
-#endif    
         }
 
         private void HandleRequestMeta(WebRequest request)
@@ -405,7 +410,7 @@ namespace Hammock.Web
             {
 #if SILVERLIGHT && !WindowsPhone
                 // [DC] User-Agent is still restricted in elevated mode
-                request.Headers[SilverlightUserAgentHeader] = UserAgent;
+                request.Headers[SilverlightUserAgentHeader ?? "X-User-Agent"] = UserAgent;
 #else
                 if(request is HttpWebRequest)
                 {
@@ -427,13 +432,13 @@ namespace Hammock.Web
 #if !SILVERLIGHT
             if (ServicePoint != null)
             {
-#if !Smartphone
+#if !Smartphone  && !NETCF
                 request.ServicePoint.ConnectionLeaseTimeout = ServicePoint.ConnectionLeaseTimeout;
                 request.ServicePoint.ReceiveBufferSize = ServicePoint.ReceiveBufferSize;
                 request.ServicePoint.UseNagleAlgorithm = ServicePoint.UseNagleAlgorithm;
                 request.ServicePoint.BindIPEndPointDelegate = ServicePoint.BindIPEndPointDelegate;
 #endif
-                request.ServicePoint.ConnectionLimit = ServicePoint.ConnectionLimit;
+              request.ServicePoint.ConnectionLimit = ServicePoint.ConnectionLimit;
                 request.ServicePoint.Expect100Continue = ServicePoint.Expect100Continue;
                 request.ServicePoint.MaxIdleTime = ServicePoint.MaxIdleTime;
             }
@@ -455,28 +460,12 @@ namespace Hammock.Web
 
 #if !SILVERLIGHT && !WindowsPhone
                 request.AutomaticDecompression = decompressionMethods;
-                request.Headers.Add(AcceptEncodingHeader, "gzip,deflate");
 #else
 
 #if !WindowsPhone
                 if (HasElevatedPermissions)
                 {
 #endif
-                /* SL3 profile prohibits setting Accept-Encoding :(
-                switch (decompressionMethods)
-                {
-                    case Silverlight.Compat.DecompressionMethods.GZip:
-                        request.Headers[AcceptEncodingHeader] = "gzip";
-                        break;
-                    case Silverlight.Compat.DecompressionMethods.Deflate:
-                        request.Headers[AcceptEncodingHeader] = "deflate";
-                        break;
-                    case Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate:
-                        request.Headers[AcceptEncodingHeader] = "gzip,deflate";
-                        break;
-                }
-                */
-
                 switch (decompressionMethods)
                 {
                     case Silverlight.Compat.DecompressionMethods.GZip:
@@ -528,22 +517,33 @@ namespace Hammock.Web
 
         private void AppendCookies(HttpWebRequest request)
         {
-            request.CookieContainer = new CookieContainer();
-
-            foreach(var cookie in Cookies.OfType<HttpCookieParameter>())
+#if !NETCF
+            if (this.CookieContainer != null)
             {
-                var value = new Cookie(cookie.Name, cookie.Value);
-                if(cookie.Domain != null)
-                {
-                    request.CookieContainer.Add(cookie.Domain, value);        
-                }
-#if !SILVERLIGHT
-                else
-                {
-                    request.CookieContainer.Add(value);
-                }
-#endif
+                request.CookieContainer = this.CookieContainer;
             }
+            else
+            {
+                request.CookieContainer = new CookieContainer();
+
+#pragma warning disable 618
+                foreach (var cookie in Cookies.OfType<HttpCookieParameter>())
+#pragma warning restore 618
+                {
+                    var value = new Cookie(cookie.Name, cookie.Value);
+                    if (cookie.Domain != null)
+                    {
+                        request.CookieContainer.Add(cookie.Domain, value);
+                    }
+#if !SILVERLIGHT
+                    else
+                    {
+                        request.CookieContainer.Add(value);
+                    }
+#endif
+                }
+            }
+#endif
         }
 
         protected virtual void AppendHeaders(WebRequest request)
@@ -585,32 +585,6 @@ namespace Hammock.Web
                         request.Headers[SilverlightUserAgentHeader ?? "X-User-Agent"] = UserAgent;
                         continue;
                     }
-
-                    if(header.Key.EqualsIgnoreCase(AcceptEncodingHeader))
-                    {
-                        if (HasElevatedPermissions)
-                        {
-                            request.Headers[header.Key] = header.Value;
-                        }
-                        else
-                        {
-                            request.Headers[SilverlightAcceptEncodingHeader ?? "X-Accept-Encoding"] = header.Value;
-                        }
-                        continue;
-                    }
-
-                    if(header.Key.EqualsIgnoreCase("Authorization"))
-                    {
-                        if (HasElevatedPermissions)
-                        {
-                            request.Headers[header.Key] = AuthorizationHeader;
-                        }
-                        else
-                        {
-                            request.Headers[SilverlightAuthorizationHeader ?? "X-Authorization"] = AuthorizationHeader;
-                        }
-                        continue;
-                    }
 #endif
                         _restrictedHeaderActions[header.Key].Invoke((HttpWebRequest) request, header.Value);
                         _restrictedHeaders.Add(header.Key, header.Value);
@@ -631,12 +605,18 @@ namespace Hammock.Web
         [Conditional("TRACE")]
         private void TraceHeaders(WebRequest request)
         {
-            foreach (var trace in request.Headers.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key])))
+            if (!TraceEnabled)
             {
-                Trace.WriteLine(trace);
+                return;
             }
 
-            foreach (var trace in _restrictedHeaders.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key])))
+            var restricted = _restrictedHeaders.AllKeys.Select(key => String.Concat(key, ": ", request.Headers[key]));
+            var remaining = request.Headers.AllKeys.Except(_restrictedHeaders.AllKeys).Select(key => String.Concat(key, ": ", request.Headers[key]));
+            var all = restricted.ToList();
+            all.AddRange(remaining);
+            all.Sort();
+
+            foreach (var trace in all)
             {
                 Trace.WriteLine(trace);
             }
@@ -663,16 +643,16 @@ namespace Hammock.Web
                       {"Expect", (r, v) => r.Expect = v},
                       {"Date", (r, v) => { /* Set by system */ }},
                       {"Host", (r, v) => { /* Set by system */ }},
-                      {"RetryIf-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v)},
+                      {"If-Modified-Since", (r, v) => r.IfModifiedSince = Convert.ToDateTime(v)},
                       {"Range", (r, v) => { throw new NotSupportedException( /* r.AddRange() */); }},
                       {"Referer", (r, v) => r.Referer = v},
                       {"Transfer-Encoding", (r, v) => { r.TransferEncoding = v; r.SendChunked = true; }},
-                      {"User-Agent", (r, v) => r.UserAgent = v}
+                      {"User-Agent", (r, v) => r.UserAgent = v }
                   };
 #else
         private readonly IDictionary<string, Action<HttpWebRequest, string>> _restrictedHeaderActions
             = new Dictionary<string, Action<HttpWebRequest, string>>(StringComparer.OrdinalIgnoreCase) {
-                      { "Accept",            (r, v) => { /* Not supported here },
+                      { "Accept",            (r, v) => r.Accept = v },
                       { "Connection",        (r, v) => { /* Set by Silverlight */ }},           
                       { "Content-Length",    (r, v) => { /* Set by Silverlight */ }},
                       { "Content-Type",      (r, v) => r.ContentType = v },
@@ -815,19 +795,25 @@ namespace Hammock.Web
 
         protected void HandleWebException(WebException exception)
         {
-            if (!(exception.Response is HttpWebResponse))
+            Stream stream = null;
+            Stream emptyStream = new MemoryStream(new byte[] { });
+                
+            if (exception.Response is HttpWebResponse)
             {
-                return;
+                var response = exception.Response;
+#if SILVERLIGHT
+                if (DecompressionMethods == Silverlight.Compat.DecompressionMethods.GZip ||
+                    DecompressionMethods == Silverlight.Compat.DecompressionMethods.Deflate ||
+                    DecompressionMethods == (Silverlight.Compat.DecompressionMethods.GZip | Silverlight.Compat.DecompressionMethods.Deflate)
+                    )
+                {
+                    response = new GzipHttpWebResponse((HttpWebResponse)response);
+                }
+#endif
+                WebResponse = response;
+                stream = WebResponse.GetResponseStream();
             }
-
-            WebResponse = exception.Response;
-            var stream = WebResponse.GetResponseStream();
-
-            if (stream == null)
-            {
-                return;
-            }
-
+            
             var args = new WebQueryResponseEventArgs(stream, exception);
             OnQueryResponse(args);
         }
@@ -1044,7 +1030,7 @@ namespace Hammock.Web
 #endif
         protected virtual WebRequest BuildMultiPartFormRequest(PostOrPut method, string url, IEnumerable<HttpPostParameter> parameters, out string boundary)
         {
-            url = AppendParameters(url);
+            url = BeforeBuildPostOrPutEntityWebRequest()(url);
 
             boundary = Guid.NewGuid().ToString();
             var request = WebRequest.Create(url);
@@ -1066,6 +1052,11 @@ namespace Hammock.Web
         [Conditional("TRACE")]
         protected void TraceRequest(WebRequest request)
         {
+            if (!TraceEnabled)
+            {
+                return;
+            }
+
             var version = request is HttpWebRequest ?
 #if SILVERLIGHT
                 "HTTP/v1.1" :
@@ -1110,7 +1101,11 @@ namespace Hammock.Web
 
 #if TRACE
                     var encoding = Encoding ?? new UTF8Encoding();
-                    Trace.WriteLine(encoding.GetString(post));
+#if NETCF
+                    Trace.WriteLineIf(TraceEnabled, encoding.GetString(post, 0, post.Length));
+#else
+                    Trace.WriteLineIf(TraceEnabled, encoding.GetString(post));
+#endif
 #endif
 
                     // [DC] Avoid disposing until no longer needed to build results
@@ -1233,7 +1228,7 @@ namespace Hammock.Web
 #if TRACE
                 if(write)
                 {
-                    Trace.WriteLine(header);
+                    Trace.WriteLineIf(TraceEnabled, header);
                 }
 #endif
                 switch (parameter.Type)
@@ -1251,10 +1246,10 @@ namespace Hammock.Web
 #if TRACE
                             if (write)
                             {
-                                Trace.WriteLine(fileHeader);
-                                Trace.WriteLine(fileLine);
-                                Trace.WriteLine("");
-                                Trace.WriteLine("[FILE DATA]");
+                                Trace.WriteLineIf(TraceEnabled, fileHeader);
+                                Trace.WriteLineIf(TraceEnabled, fileLine);
+                                Trace.WriteLineIf(TraceEnabled, "");
+                                Trace.WriteLineIf(TraceEnabled, "[FILE DATA]");
                             }
 #endif
 
@@ -1311,9 +1306,9 @@ namespace Hammock.Web
 #if TRACE
                             if(write)
                             {
-                                Trace.WriteLine(fieldLine);
-                                Trace.WriteLine("");
-                                Trace.WriteLine(parameter.Value);
+                                Trace.WriteLineIf(TraceEnabled, fieldLine);
+                                Trace.WriteLineIf(TraceEnabled, "");
+                                Trace.WriteLineIf(TraceEnabled, parameter.Value);
                             }
 #endif
                             break;
@@ -1325,7 +1320,7 @@ namespace Hammock.Web
 #if TRACE
             if(write)
             {
-                Trace.WriteLine(footer);
+                Trace.WriteLineIf(TraceEnabled, footer);
             }
 #endif
             if(write)

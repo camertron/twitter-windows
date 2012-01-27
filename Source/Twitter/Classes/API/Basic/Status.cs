@@ -23,7 +23,13 @@ namespace Twitter.API.Basic
 
             if (m_jnNode.ContainsKey("text") && m_jnNode["text"].IsString())
             {
-                m_stStatusText = StatusText.FromString(m_jnNode["text"].ToString());
+                JsonNode jnEntities = Entities();
+                List<JsonObject> ljoUrls = null;
+
+                if (jnEntities != null && jnEntities.ContainsKey("urls") && jnEntities["urls"].IsList())
+                    ljoUrls = jnEntities["urls"].ToList();
+
+                m_stStatusText = StatusText.FromString(RemoveRT(m_jnNode["text"].ToString()), ljoUrls);
                 m_bIsReply = (m_stStatusText.Words.Count > 1) && (m_stStatusText.Words[0].Type == StatusTextElement.StatusTextElementType.ScreenName);
                 m_bIsRetweet = (m_jnNode.ContainsKey("retweeted_status")) || (m_stStatusText.Words.Count > 0) && (m_stStatusText.Words[0].Text.Trim() == "RT");
 
@@ -35,6 +41,27 @@ namespace Twitter.API.Basic
                         break;
                 }
             }
+        }
+
+        private string RemoveRT(string sStr)
+        {
+            if (sStr.Substring(0, 3) == "RT ")
+            {
+                int iColonPos = sStr.IndexOf(":");
+
+                if (iColonPos > -1)
+                    return sStr.Substring(sStr.IndexOf(":") + 1).TrimStart();
+            }
+
+            return sStr;
+        }
+
+        public JsonNode Entities()
+        {
+            if (m_jnNode.ContainsKey("entities"))
+                return m_jnNode["entities"].ToNode();
+
+            return null;
         }
 
         public User User

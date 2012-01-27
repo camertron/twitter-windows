@@ -16,15 +16,15 @@ namespace Twitter.API.Basic
     {
         protected const string C_BASE_URL = "http://api.twitter.com";
 
-        public BasicAPI(string sConsumerKey, string sConsumerSecret) : base(sConsumerKey, sConsumerSecret) { }
         public BasicAPI(OAuthCredentials oaCredentials) : base(oaCredentials) { }
 
-        private void DoRequest(string sEndpoint, WebMethod wmTransferType, Dictionary<string, string> dssParams, APIReturn aprReturn)
+        protected void DoRequest(string sEndpoint, WebMethod wmTransferType, Dictionary<string, string> dssParams, APIReturn aprReturn)
         {
             RestRequest rrRequest = new RestRequest();
 
             rrRequest.Path = sEndpoint;
             m_oaCredentials.Type = OAuthType.ProtectedResource;
+            m_oaCredentials.Verifier = null;
 
             foreach (KeyValuePair<string, string> kvpCur in dssParams)
                 rrRequest.AddParameter(kvpCur.Key, kvpCur.Value);
@@ -40,55 +40,62 @@ namespace Twitter.API.Basic
             rcClient.BeginRequest(rrRequest, DoRequestCallback, aprReturn);
         }
 
-        private void DoRequestCallback(RestRequest rrqRequest, RestResponse rrsResponse, object objUserState)
+        protected void DoRequestCallback(RestRequest rrqRequest, RestResponse rrsResponse, object objUserState)
         {
-            /*StreamWriter swWriter = new StreamWriter("C:/Users/le grand fromage/Desktop/tweets.json", true, Encoding.UTF8);
-            StreamReader srReader = new StreamReader(rrsResponse.ContentStream, Encoding.UTF8);
-            swWriter.WriteLine(srReader.ReadToEnd());
-            swWriter.Close();
-            return;*/
-
-            JsonDocument jsDoc = JsonParser.GetParser().ParseStream(new StreamReader(rrsResponse.ContentStream, Encoding.UTF8));
-            APIReturn aprReturn = (APIReturn)objUserState;
-            object objToReturn = null;
-            string sErrorMessage = "";
-            APICallbackArgs acArgs;
-
-            if (jsDoc.Root.IsNode() && jsDoc.Root.ToNode().ContainsKey("error"))
-                sErrorMessage = jsDoc.Root.ToNode()["error"].ToString();
-
-            if (aprReturn.ReturnType != null)
+            try
             {
-                if (jsDoc.Root.IsList())
+                //StreamWriter swWriter = new StreamWriter("C:/Users/le grand fromage/Desktop/tweets.json", true, Encoding.UTF8);
+                //StreamReader srReader = new StreamReader(rrsResponse.ContentStream, Encoding.UTF8);
+                //swWriter.WriteLine(srReader.ReadToEnd());
+                //swWriter.Close();
+                //return;
+
+                JsonDocument jsDoc = JsonParser.GetParser().ParseStream(new StreamReader(rrsResponse.ContentStream, Encoding.UTF8));
+                APIReturn aprReturn = (APIReturn)objUserState;
+                object objToReturn = null;
+                string sErrorMessage = "";
+                APICallbackArgs acArgs;
+
+                if (jsDoc.Root.IsNode() && jsDoc.Root.ToNode().ContainsKey("error"))
+                    sErrorMessage = jsDoc.Root.ToNode()["error"].ToString();
+                else if (rrsResponse.InnerException != null)
+                    sErrorMessage = rrsResponse.InnerException.Message;
+
+                if (aprReturn.ReturnType != null)
                 {
-                    //if the return type is a generic list...
-                    if (aprReturn.ReturnType.Name == "List`1")
+                    if (jsDoc.Root.IsList())
                     {
-                        //get an instance of the list<generic> that will have generics added to it and eventually be returned via the callback
-                        //get the type of the generic (because we'll need to make specific instances of him later)
-                        objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType);
-                        Type tListObjType = aprReturn.ReturnType.GetGenericArguments()[0];
+                        //if the return type is a generic list...
+                        if (aprReturn.ReturnType.Name == "List`1")
+                        {
+                            //get an instance of the list<generic> that will have generics added to it and eventually be returned via the callback
+                            //get the type of the generic (because we'll need to make specific instances of him later)
+                            objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType);
+                            Type tListObjType = aprReturn.ReturnType.GetGenericArguments()[0];
 
-                        //dynamically invoke the Add() method of the list
-                        //what's being added: a newly minted instance of the generic class plus data via the constructor
-                        foreach (JsonObject joCur in jsDoc.Root.ToList())
-                            aprReturn.ReturnType.GetMethod("Add").Invoke(objToReturn, new Object[] { System.Activator.CreateInstance(tListObjType, joCur.ToNode()) });
+                            //dynamically invoke the Add() method of the list
+                            //what's being added: a newly minted instance of the generic class plus data via the constructor
+                            foreach (JsonObject joCur in jsDoc.Root.ToList())
+                                aprReturn.ReturnType.GetMethod("Add").Invoke(objToReturn, new Object[] { System.Activator.CreateInstance(tListObjType, joCur.ToNode()) });
+                        }
+                        else
+                            objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToList());
                     }
-                    else
-                        objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToList());
+                    else if (jsDoc.Root.IsNode())
+                        objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToNode());
                 }
-                else if (jsDoc.Root.IsNode())
-                    objToReturn = System.Activator.CreateInstance(aprReturn.ReturnType, jsDoc.Root.ToNode());
-            }
 
-            acArgs = new APICallbackArgs(rrsResponse.StatusCode == HttpStatusCode.OK, sErrorMessage, objToReturn);
-            aprReturn.SynchronizeInvoke(new object[] { acArgs });  //synchronously invoke the return callback
+                acArgs = new APICallbackArgs(rrsResponse.StatusCode == HttpStatusCode.OK, sErrorMessage, objToReturn);
+                aprReturn.SynchronizeInvoke(new object[] { acArgs });  //synchronously invoke the return callback
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("An unknown Twitter API error has occurred (basic).", "API Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
         }
 
         public void UpdateStatus(APICallback apcCallback, object objCallbackArg, string sMessage)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
             dssParams["status"] = sMessage;
             DoRequest("statuses/update.json", WebMethod.Post, dssParams, new APIReturn(apcCallback, null, objCallbackArg));
@@ -96,8 +103,6 @@ namespace Twitter.API.Basic
 
         public void Retweet(APICallback apcCallback, object objCallbackArg, string sTweetId, bool bTrimUser = false, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "trim_user", bTrimUser);
@@ -110,8 +115,6 @@ namespace Twitter.API.Basic
                                     int iMaxId = -1, bool bTrimUser = false, bool bIncludeRts = true, 
                                     bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "screen_name", sScreenName);
@@ -129,8 +132,6 @@ namespace Twitter.API.Basic
         public void GetHomeTimeline(APICallback apcCallback, object objCallbackArg, int iCount = 20, int iPage = 1, int iSinceId = -1,
                                     int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "since_id", iSinceId);
@@ -145,8 +146,6 @@ namespace Twitter.API.Basic
 
         public void LookupUser(APICallback apcCallback, object objCallbackArg, List<string> lsScreenNames = null, List<string> lsUserIds = null, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             if (lsScreenNames != null)
@@ -162,8 +161,6 @@ namespace Twitter.API.Basic
 
         public void GetFavorites(APICallback apcCallback, object objCallbackArg, string sUserIdOrScreenName = "", int iPage = 1, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "page", iPage);
@@ -177,8 +174,6 @@ namespace Twitter.API.Basic
 
         public void CreateFavorite(APICallback apcCallback, object objCallbackArg, string sStatusId, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "id", sStatusId);
@@ -189,8 +184,6 @@ namespace Twitter.API.Basic
 
         public void DestroyFavorite(APICallback apcCallback, object objCallbackArg, string sStatusId, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "id", sStatusId);
@@ -202,8 +195,6 @@ namespace Twitter.API.Basic
         public void GetMentions(APICallback apcCallback, object objCallbackArg, int iCount = 20, int iPage = 1, int iSinceId = -1,
                                 int iMaxId = -1, bool bTrimUser = false, bool bIncludeEntities = false)
         {
-            CheckAuthenticated();
-
             Dictionary<string, string> dssParams = new Dictionary<string, string>();
 
             AddParameter(ref dssParams, "since_id", iSinceId);

@@ -19,4 +19,12 @@ namespace Twitter.API
             get { return "Could not get a request token from Twitter."; }
         }
     }
+
+    public class UnavailableAccessTokenException : ApplicationException
+    {
+        public override string Message
+        {
+            get { return "Could not get an access token from Twitter."; }
+        }
+    }
 }

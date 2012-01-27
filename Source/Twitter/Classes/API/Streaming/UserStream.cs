@@ -43,7 +43,6 @@ namespace Twitter.API.Streaming
         {
             m_oaCredentials = oaCredentials;
             m_bscAPI = new BasicAPI(m_oaCredentials);
-            m_bscAPI.Authenticate(m_oaCredentials);
 
             m_rcClient = new RestClient
             {
@@ -67,7 +66,7 @@ namespace Twitter.API.Streaming
         private void HomeTimeline()
         {
             //first get initial timeline from the basic API
-            m_bscAPI.GetHomeTimeline(HomeTimelineCallback, null);
+            m_bscAPI.GetHomeTimeline(HomeTimelineCallback, null, 20, 1, -1, -1, false, true);
         }
 
         private void HomeTimelineCallback(APICallbackArgs acArgs)
@@ -92,6 +91,9 @@ namespace Twitter.API.Streaming
 
         private void EstablishStream()
         {
+            m_oaCredentials.Verifier = null;
+            m_oaCredentials.Type = OAuthType.ProtectedResource;
+
             //construct and open streaming request
             RestRequest rrqRequest = new RestRequest
             {
@@ -107,39 +109,49 @@ namespace Twitter.API.Streaming
 
         private void RequestCallback(RestRequest rrqRequest, RestResponse rrsResponse, object objUserState)
         {
-            StreamReader srReader = new StreamReader(rrsResponse.ContentStream, Encoding.UTF8);
-            string sCurLine;
-
-            do
+            try
             {
-                sCurLine = srReader.ReadLine().Trim();
-            } while ((sCurLine == "") && (! srReader.EndOfStream));
+                StreamReader srReader = new StreamReader(rrsResponse.ContentStream, Encoding.UTF8);
+                string sCurLine;
 
-            JsonDocument jdFinal = JsonParser.GetParser().ParseString(sCurLine);
+                do
+                {
+                    sCurLine = srReader.ReadLine().Trim();
+                } while ((sCurLine == "") && (!srReader.EndOfStream));
 
-            if (jdFinal.Root.IsNode())
+                JsonDocument jdFinal = JsonParser.GetParser().ParseString(sCurLine);
+
+                if (jdFinal != null)
+                {
+                    if (jdFinal.Root.IsNode())
+                    {
+                        if (jdFinal.Root.ToNode().ContainsKey("friends"))
+                        {
+                            //this is the friends list that's sent at the beginning of each userstream connection
+                            APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.FriendsList);
+                        }
+                        else if (jdFinal.Root.ToNode().ContainsKey("retweeted"))
+                        {
+                            Status stNewStatus = new Status(jdFinal.Root.ToNode());
+
+                            if (stNewStatus.IsReply && stNewStatus.ReplyNames.Contains(m_oaCredentials.ClientUsername))
+                                APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
+                            else
+                                APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
+                        }
+                        else if (jdFinal.Root.ToNode().ContainsKey("recipient_id") && jdFinal.Root.ToNode().ContainsKey("sender_id"))
+                        {
+                            DirectMessage dmNewMessage = new DirectMessage(jdFinal.Root.ToNode());
+                            APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.DirectMessage);
+                        }
+
+                        //also need to add OnDelete for when a tweet gets deleted
+                    }
+                }
+            }
+            catch(Exception e)
             {
-                if (jdFinal.Root.ToNode().ContainsKey("friends"))
-                {
-                    //this is the friends list that's sent at the beginning of each userstream connection
-                    APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.FriendsList);
-                }
-                else if (jdFinal.Root.ToNode().ContainsKey("retweeted"))
-                {
-                    Status stNewStatus = new Status(jdFinal.Root.ToNode());
-
-                    if (stNewStatus.IsReply && stNewStatus.ReplyNames.Contains(m_oaCredentials.ClientUsername))
-                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Reply);
-                    else
-                        APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.Tweet);
-                }
-                else if (jdFinal.Root.ToNode().ContainsKey("recipient_id") && jdFinal.Root.ToNode().ContainsKey("sender_id"))
-                {
-                    DirectMessage dmNewMessage = new DirectMessage(jdFinal.Root.ToNode());
-                    APIReturn.SynchronizeInvoke(Receive, this, jdFinal, ReceiveType.DirectMessage);
-                }
-
-                //also need to add OnDelete for when a tweet gets deleted
+                MessageBox.Show("An unknown Twitter API error has occurred (user streams). " + e.Message, "API Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
 

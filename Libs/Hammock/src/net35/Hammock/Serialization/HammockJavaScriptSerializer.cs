@@ -38,12 +38,12 @@ namespace Hammock.Serialization
             get { return "application/json"; }
         }
 
-        public virtual object Deserialize(RestResponse response, Type type)
+        public virtual object Deserialize(RestResponseBase response, Type type)
         {
             return _serializer.DeserializeObject(response.Content);
         }
 
-        public virtual T Deserialize<T>(RestResponse<T> response)
+        public virtual T Deserialize<T>(RestResponseBase response)
         {
             return _serializer.Deserialize<T>(response.Content);
         }

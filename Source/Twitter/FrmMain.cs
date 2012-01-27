@@ -10,6 +10,7 @@ using Twitter.API.Basic;
 using Twitter.Controls;
 using Twitter.Json;
 using System.IO;
+using Hammock.Authentication.OAuth;
 
 namespace Twitter
 {
@@ -37,35 +38,43 @@ namespace Twitter
         public FrmMain()
         {
             InitializeComponent();
+            //IsolatedStorageManager.GetManager().Store.DeleteFile(Literals.C_ACCOUNT_FILE);
 
             //assignments
             m_sbbSelected = sbbTimeline;
 
             //object creation
-            m_ftTweetForm = new FrmTweet();
+            m_ftTweetForm = new FrmTweet(this);
             m_fpPrefForm = new FrmPreferences();
 
-            //event hookups
+            //timeline event hookups
             tmlTimeline.StatusTextClicked += new Timeline.StatusTextClickedHandler(tmlTimeline_StatusTextClicked);
             tmlTimeline.RetweetClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_RetweetClicked);
             tmlTimeline.FavoriteClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_FavoriteClicked);
             tmlTimeline.QuoteTweetClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_QuoteTweetClicked);
             tmlTimeline.ReplyClicked += new Timeline.StatusOptionClickedHandler(tmlTimeline_ReplyClicked);
-            this.MouseMove += new MouseEventHandler(FrmMain_MouseMove);
 
+            //preference form event hookups
+            m_fpPrefForm.CredentialsAdded += new FrmAddAccount.OAuthDanceHandler(m_fpPrefForm_CredentialsAdded);
+            m_fpPrefForm.AccountList = TwitterController.GetController().Accounts;
+
+            //form event hookups
             m_ftTweetForm.TweetClicked += new FrmTweet.TweetClickedEventHandler(m_ftTweetForm_TweetClicked);
             tsbTimelineScroller.Scroll += new ScrollEventHandler(tsbTimelineScroller_Scroll);
             tmlTimeline.ScrolledToTop = true;
 
             //@TODO: do this for testing purposes only
-            //UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets_short.json").Root.ToList());
-            //for (int i = 0; i < utLine.Statuses.Count; i++)
-                //Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+            if (Literals.C_ENVIRONMENT == Env.Development)
+            {
+                UserTimeline utLine = new UserTimeline(JsonParser.GetParser().ParseFile("../../../../Documents/test/tweets/tweets2.json").Root.ToList());
+                for (int i = 0; i < utLine.Statuses.Count; i++)
+                    Account_UserStream_Receive(this, new JsonDocument(utLine.Statuses[i].Object), API.Streaming.UserStream.ReceiveType.Tweet);
+            }
         }
 
-        private void FrmMain_MouseMove(object sender, MouseEventArgs e)
+        private void m_fpPrefForm_CredentialsAdded(object sender, OAuthCredentials oaCredentials)
         {
-            this.Text = e.X.ToString() + ", " + e.Y.ToString();
+            TwitterController.GetController().AddNewAccount(oaCredentials);
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)
@@ -100,20 +109,18 @@ namespace Twitter
 
         private void tmlTimeline_ReplyClicked(object sender, TimelineStatus tsControl, Status stStatus)
         {
-            m_ftTweetForm.Avatar = m_aclAccounts.ActiveAccount.Avatar;
+            m_ftTweetForm.Avatar = m_twController.ActiveAccount.Avatar;
             m_ftTweetForm.ShowDialog("@" + stStatus.User["screen_name"].ToString() + " ");
         }
 
         private void tmlTimeline_QuoteTweetClicked(object sender, TimelineStatus tsControl, Status stStatus)
         {
-            m_ftTweetForm.Avatar = m_aclAccounts.ActiveAccount.Avatar;
+            m_ftTweetForm.Avatar = m_twController.ActiveAccount.Avatar;
             m_ftTweetForm.ShowDialog("\"@" + stStatus.User["screen_name"].ToString() + ": " + stStatus["text"].ToString() + "\"");
         }
 
         private void tmlTimeline_FavoriteClicked(object sender, TimelineStatus tsControl, Status stStatus)
         {
-            tsControl.Favorite = !tsControl.Favorite;
-
             if (tsControl.Favorite)
                 Accounts.ActiveAccount.BasicAPI.CreateFavorite(FavoriteCreateCallback, null, stStatus["id"].ToString());
             else
@@ -251,6 +258,8 @@ namespace Twitter
 
         private void sbbMessages_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("Sorry!  Direct Messages haven't been implemented yet.  Contribute to this project on Github (http://github.com/camertron/twitter-windows) and scrach your itch!", "Feature Not Implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
             m_sbbSelected.Selected = false;
             sbbMessages.Selected = true;
             m_sbbSelected = sbbMessages;
@@ -260,6 +269,8 @@ namespace Twitter
 
         private void sbbLists_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("Sorry!  Lists haven't been implemented yet.  Contribute to this project on Github (http://github.com/camertron/twitter-windows) and scrach your itch!", "Feature Not Implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
             m_sbbSelected.Selected = false;
             sbbLists.Selected = true;
             m_sbbSelected = sbbLists;
@@ -268,6 +279,8 @@ namespace Twitter
 
         private void sbbPeople_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("Sorry!  Your Activity hasn't been implemented yet.  Contribute to this project on Github (http://github.com/camertron/twitter-windows) and scrach your itch!", "Feature Not Implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
             m_sbbSelected.Selected = false;
             sbbPeople.Selected = true;
             m_sbbSelected = sbbPeople;
@@ -277,6 +290,8 @@ namespace Twitter
 
         private void sbbSearch_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("Sorry!  Search hasn't been implemented yet.  Contribute to this project on Github (http://github.com/camertron/twitter-windows) and scrach your itch!", "Feature Not Implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
             m_sbbSelected.Selected = false;
             sbbSearch.Selected = true;
             m_sbbSelected = sbbSearch;
@@ -316,9 +331,23 @@ namespace Twitter
             cmsLarry.Show(Cursor.Position);
         }
 
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.N && e.Control)
+                ShowNewTweet();
+
+            base.OnKeyDown(e);
+        }
+
+        protected void ShowNewTweet()
+        {
+            m_ftTweetForm.Avatar = m_twController.ActiveAccount.Avatar;
+            m_ftTweetForm.ShowDialog("");
+        }
+
         private void tsmiNewTweet_Click(object sender, EventArgs e)
         {
-            m_ftTweetForm.ShowDialog("");
+            ShowNewTweet();
         }
 
         private void m_ftTweetForm_TweetClicked(object sender, string sTweetText)

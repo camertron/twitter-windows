@@ -63,48 +63,48 @@ namespace Twitter.Controls
         {
             if ((e.Y >= m_iHandleTop) && (e.Y <= m_iHandleBottom))
                 m_iDragSpace = m_iHandleTop - e.Y;
+
+            //make the scrollbar jump to the mouse click point
+            this.OnMouseMove(e);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                if ((e.Y >= m_iHandleTop) && (e.Y <= m_iHandleBottom))
+                //calculate m_iValue, then invalidate
+
+                //this is the new top of the scroll handle
+                float fNewTop = e.Y + m_iDragSpace;  //drag space is the space between the top of the handle and where the mouse has grabbed it
+
+                //this is the percent scrolled the new top represents
+                float fPercentPos = fNewTop / (this.Height - m_iLargeChange);
+
+                //this is the new scroll value
+                int iNewVal = (int)(m_iMax * fPercentPos);
+                int iOldVal = m_iValue;
+
+                if (iNewVal < 0)
+                    iNewVal = 0;
+                else if (iNewVal > m_iMax)
+                    iNewVal = m_iMax;
+                else
+                    this.Value = iNewVal;
+
+                if (Scroll != null)
                 {
-                    //calculate m_iValue, then invalidate
+                    ScrollEventType setScrollType;
 
-                    //this is the new top of the scroll handle
-                    float fNewTop = e.Y + m_iDragSpace;  //drag space is the space between the top of the handle and where the mouse has grabbed it
-
-                    //this is the percent scrolled the new top represents
-                    float fPercentPos = fNewTop / (this.Height - m_iLargeChange);
-
-                    //this is the new scroll value
-                    int iNewVal = (int)(m_iMax * fPercentPos);
-                    int iOldVal = m_iValue;
-
-                    if (iNewVal < 0)
-                        iNewVal = 0;
-                    else if (iNewVal > m_iMax)
-                        iNewVal = m_iMax;
+                    if (iNewVal == 0)
+                        setScrollType = ScrollEventType.First;
+                    else if (iNewVal == m_iMax)
+                        setScrollType = ScrollEventType.Last;
+                    else if (iNewVal > m_iValue)
+                        setScrollType = ScrollEventType.SmallIncrement;
                     else
-                        this.Value = iNewVal;
+                        setScrollType = ScrollEventType.SmallDecrement;
 
-                    if (Scroll != null)
-                    {
-                        ScrollEventType setScrollType;
-
-                        if (iNewVal == 0)
-                            setScrollType = ScrollEventType.First;
-                        else if (iNewVal == m_iMax)
-                            setScrollType = ScrollEventType.Last;
-                        else if (iNewVal > m_iValue)
-                            setScrollType = ScrollEventType.SmallIncrement;
-                        else
-                            setScrollType = ScrollEventType.SmallDecrement;
-
-                        Scroll(this, new ScrollEventArgs(setScrollType, iOldVal, iNewVal, ScrollOrientation.VerticalScroll));
-                    }
+                    Scroll(this, new ScrollEventArgs(setScrollType, iOldVal, iNewVal, ScrollOrientation.VerticalScroll));
                 }
             }
         }

@@ -3,7 +3,6 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
-using Hammock.Authentication.Basic;
 using Hammock.Authentication.OAuth;
 using Hammock.Web;
 using NUnit.Framework;
@@ -11,7 +10,7 @@ using NUnit.Framework;
 namespace Hammock.Tests
 {
     [TestFixture]
-    public partial class RestClientTests
+    public class RestClientTests
     {
         private string _consumerKey;
         private string _consumerSecret;
@@ -48,6 +47,25 @@ namespace Hammock.Tests
                               };
 
             var response = client.Request(request);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Test]
+        public void Can_request_get_with_header_on_client()
+        {
+            var client = new RestClient
+            {
+                Authority = "https://api.twitter.com",
+                UserAgent = "Hammock",
+                Path = "statuses/public_timeline.json",
+                DecompressionMethods = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            client.AddHeader("Accept", "application/json");
+            
+            var response = client.Request();
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -160,6 +178,65 @@ namespace Hammock.Tests
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
+
+#if NET40
+        [Test]
+        public void Can_make_dynamic_request_for_collection()
+        {
+            var client = new RestClient
+            {
+                Authority = "https://api.twitter.com",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "statuses/public_timeline.json",
+                Method = WebMethod.Get
+            };
+            
+            var response = client.RequestDynamic(request);
+            Assert.IsNotNull(response);
+            foreach (var tweet in response.ContentEntity)
+            {
+                Assert.IsNotNull(tweet);
+                Assert.IsNotNullOrEmpty(tweet.Text);
+                
+                Can_handle_nested_dynamic_json(tweet);
+
+                Console.WriteLine(tweet.Text);
+            }
+        }
+
+        private static void Can_handle_nested_dynamic_json(dynamic tweet)
+        {
+            var firstLevel = tweet.User;
+            Assert.IsNotNull(firstLevel);
+                
+            var secondLevel = firstLevel.ScreenName;
+            Assert.IsNotNull(secondLevel);
+        }
+
+        [Test]
+        public void Can_make_dynamic_request_for_single()
+        {
+            var client = new RestClient
+            {
+                Authority = "https://api.twitter.com",
+                UserAgent = "Hammock"
+            };
+
+            var request = new RestRequest
+            {
+                Path = "users/show.json?screen_name=hammockrest",
+                Method = WebMethod.Get
+            };
+
+            var response = client.RequestDynamic(request).ContentEntity;
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.ScreenName);
+        }
+#endif
 
         public RestRequest PrepareEchoRequest()
         {

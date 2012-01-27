@@ -198,8 +198,7 @@ namespace Hammock.Tasks
                             }
                             else if (newInterval.HasValue)
                             {
-                                Timer.Change((int)newInterval.Value.TotalMilliseconds,
-                                                  (int)newInterval.Value.TotalMilliseconds);
+                                Timer.Change((int)newInterval.Value.TotalMilliseconds, (int)newInterval.Value.TotalMilliseconds);
                             }
                         }
                         finally

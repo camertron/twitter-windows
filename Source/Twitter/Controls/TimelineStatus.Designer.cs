@@ -38,9 +38,9 @@
             this.abReply = new Twitter.Controls.ActionButton();
             this.abFavorite = new Twitter.Controls.ActionButton();
             this.abRetweet = new Twitter.Controls.ActionButton();
-            this.pbFavoriteBadge = new System.Windows.Forms.PictureBox();
+            this.pbDogear = new System.Windows.Forms.PictureBox();
             this.cmsRetweet.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbFavoriteBadge)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbDogear)).BeginInit();
             this.SuspendLayout();
             // 
             // ttfTextField
@@ -55,6 +55,8 @@
             this.ttfTextField.Name = "ttfTextField";
             this.ttfTextField.ReadOnly = true;
             this.ttfTextField.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.ttfTextField.SelectionLength = 0;
+            this.ttfTextField.SelectionStart = 0;
             this.ttfTextField.Size = new System.Drawing.Size(300, 16);
             this.ttfTextField.TabIndex = 5;
             // 
@@ -64,19 +66,19 @@
             this.tsmiRetweet,
             this.tsmiQuoteTweet});
             this.cmsRetweet.Name = "cmsRetweet";
-            this.cmsRetweet.Size = new System.Drawing.Size(153, 70);
+            this.cmsRetweet.Size = new System.Drawing.Size(152, 48);
             // 
             // tsmiRetweet
             // 
             this.tsmiRetweet.Name = "tsmiRetweet";
-            this.tsmiRetweet.Size = new System.Drawing.Size(152, 22);
+            this.tsmiRetweet.Size = new System.Drawing.Size(151, 22);
             this.tsmiRetweet.Text = "Retweet...";
             this.tsmiRetweet.Click += new System.EventHandler(this.tsmiRetweet_Click);
             // 
             // tsmiQuoteTweet
             // 
             this.tsmiQuoteTweet.Name = "tsmiQuoteTweet";
-            this.tsmiQuoteTweet.Size = new System.Drawing.Size(152, 22);
+            this.tsmiQuoteTweet.Size = new System.Drawing.Size(151, 22);
             this.tsmiQuoteTweet.Text = "Quote Tweet...";
             this.tsmiQuoteTweet.Click += new System.EventHandler(this.tsmiQuoteTweet_Click);
             // 
@@ -124,16 +126,15 @@
             this.abRetweet.ToolTipText = "Retweet";
             this.abRetweet.Visible = false;
             // 
-            // pbFavoriteBadge
+            // pbDogear
             // 
-            this.pbFavoriteBadge.Image = ((System.Drawing.Image)(resources.GetObject("pbFavoriteBadge.Image")));
-            this.pbFavoriteBadge.Location = new System.Drawing.Point(357, 0);
-            this.pbFavoriteBadge.Name = "pbFavoriteBadge";
-            this.pbFavoriteBadge.Size = new System.Drawing.Size(25, 25);
-            this.pbFavoriteBadge.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pbFavoriteBadge.TabIndex = 6;
-            this.pbFavoriteBadge.TabStop = false;
-            this.pbFavoriteBadge.Visible = false;
+            this.pbDogear.Location = new System.Drawing.Point(357, 0);
+            this.pbDogear.Name = "pbDogear";
+            this.pbDogear.Size = new System.Drawing.Size(25, 25);
+            this.pbDogear.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pbDogear.TabIndex = 6;
+            this.pbDogear.TabStop = false;
+            this.pbDogear.Visible = false;
             // 
             // TimelineStatus
             // 
@@ -144,12 +145,12 @@
             this.Controls.Add(this.abReply);
             this.Controls.Add(this.abFavorite);
             this.Controls.Add(this.abRetweet);
-            this.Controls.Add(this.pbFavoriteBadge);
+            this.Controls.Add(this.pbDogear);
             this.DoubleBuffered = true;
             this.Name = "TimelineStatus";
             this.Size = new System.Drawing.Size(382, 114);
             this.cmsRetweet.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pbFavoriteBadge)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbDogear)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -165,7 +166,7 @@
         private System.Windows.Forms.ContextMenuStrip cmsRetweet;
         private System.Windows.Forms.ToolStripMenuItem tsmiRetweet;
         private System.Windows.Forms.ToolStripMenuItem tsmiQuoteTweet;
-        private System.Windows.Forms.PictureBox pbFavoriteBadge;
+        private System.Windows.Forms.PictureBox pbDogear;
 
     }
 }

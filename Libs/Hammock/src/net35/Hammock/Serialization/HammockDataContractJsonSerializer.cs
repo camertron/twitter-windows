@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if NET40
+using System.Dynamic;
+#endif
 using System.IO;
 using System.Runtime.Serialization.Json;
 
@@ -38,7 +41,7 @@ namespace Hammock.Serialization
 
         #region IDeserializer Members
 
-        public virtual object Deserialize(RestResponse response, Type type)
+        public virtual object Deserialize(RestResponseBase response, Type type)
         {
             object instance;
             using (var stream = new MemoryStream(ContentEncoding.GetBytes(response.Content)))
@@ -49,7 +52,7 @@ namespace Hammock.Serialization
             return instance;
         }
 
-        public virtual T Deserialize<T>(RestResponse<T> response)
+        public virtual T Deserialize<T>(RestResponseBase response)
         {
             var type = typeof (T);
             T instance;
@@ -60,6 +63,13 @@ namespace Hammock.Serialization
             }
             return instance;
         }
+
+#if NET40
+        public dynamic DeserializeDynamic(RestResponseBase response)
+        {
+            throw new NotSupportedException();
+        }
+#endif
 
         #endregion
 

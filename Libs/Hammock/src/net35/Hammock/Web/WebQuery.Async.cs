@@ -181,12 +181,28 @@ namespace Hammock.Web
                 return;
             }
 
-#if !Smartphone && !WindowsPhone && !SL4
-            // [DC] request.Timeout is ignored with async
-            var timeout = RequestTimeout != null ? 
+
+            var timeout = RequestTimeout != null ?
                 (int)RequestTimeout.Value.TotalMilliseconds
                 : 300000; // Default ReadWriteTimeout
 
+
+#if WindowsPhone
+            // [DS] timout handling not supported in Windows Phone so implementing
+            //      with timer.
+            var state = new Pair<WebRequest, IAsyncResult>
+            {
+                First = request,
+                Second = result
+            };
+       
+            if(this.timer==null)
+                this.timer = new Timer(TimerTimedOut, state, timeout, Timeout.Infinite);
+#endif
+
+#if !Smartphone && !WindowsPhone && !SL4 && !NETCF
+            // [DC] request.Timeout is ignored with async
+            
             var isPost = result is WebQueryAsyncResult;
             if (isPost)
             {
@@ -211,8 +227,22 @@ namespace Hammock.Web
 #endif
         }
 
+#if WindowsPhone
+        // [DS] Handler for Windows Phone timeouts.
+        int completed = 0;
+        System.Threading.Timer timer = null;
+
+        private void TimerTimedOut(object state)
+        {
+            this.timer.Change(Timeout.Infinite, Timeout.Infinite);
+            this.timer.Dispose();
+            TimedOutCallback(state, true);
+        }
+#endif
+
         private void TimedOutCallback(object state, bool timedOut)
         {
+            
             if (!timedOut)
             {
                 return;
@@ -224,6 +254,15 @@ namespace Hammock.Web
                 var request = pair.First;
                 var result = pair.Second;
 
+#if WindowsPhone
+                // Since this timeout is raised by a timer, check that
+                // reponse has not been completed yet..
+                if (Interlocked.Increment(ref completed) != 1)
+                {
+                    // We have finished so this is not actually a timeout
+                    return;
+                }
+#endif
                 TimedOut = true;
                 request.Abort();
 
@@ -238,8 +277,8 @@ namespace Hammock.Web
                     };
 #if TRACE
                     // Just for cosmetic purposes
-                    Trace.WriteLine(String.Concat("RESPONSE: ", response.StatusCode));
-                    Trace.WriteLine("\r\n");
+                    Trace.WriteLineIf(TraceEnabled, string.Concat("RESPONSE: ", response.StatusCode));
+                    Trace.WriteLineIf(TraceEnabled, "\r\n");
 #endif
                     foreach(var postHandle in _postHandles)
                     {
@@ -297,6 +336,11 @@ namespace Hammock.Web
         
         protected virtual void GetAsyncResponseCallback(IAsyncResult asyncResult)
         {
+
+#if WindowsPhone
+            Interlocked.Increment(ref completed);
+#endif
+
             object store;
             var request = GetAsyncCacheStore(asyncResult, out store);
 
@@ -495,85 +539,78 @@ namespace Hammock.Web
                 }
 
                 NewStreamMessageEvent += WebQueryNewStreamMessageEvent;
+
                 _isStreaming = true;
 
                 var count = 0;
                 var results = new List<string>();
                 var start = DateTime.UtcNow;
                 var bufferString = string.Empty;
+                var data = new byte[4096];
 
-                while (stream.CanRead)
+                try
                 {
-                    var data = new byte[4096];
-                    try
+                    int read;
+                    while (stream.CanRead && (read = stream.Read(data, 0, data.Length)) > 0)
                     {
-                        int read;
-                        while ((read = stream.Read(data, 0, data.Length)) > 0)
+                        var readString = Encoding.UTF8.GetString(data, 0, read);
+                        bufferString = ProcessBuffer(bufferString + readString);
+                        if (!_isStreaming)
                         {
-
-                            var readString = Encoding.UTF8.GetString(data, 0, read);
-                            bufferString = ProcessBuffer(bufferString + readString);
-                            if (!_isStreaming)
-                            {
-                                // [DC] Streaming was cancelled out of band
-                                EndStreaming(request);
-                                return;
-                            }
-
-                            if (readString.Equals(Environment.NewLine))
-                            {
-                                // Keep-Alive
-                                continue;
-                            }
-
-                            if (readString.Equals("<html>"))
-                            {
-                                // We're looking at a 401 or similar; construct error result?
-                                EndStreaming(request);
-                                return;
-                            }
-
-                            results.Add(readString);
-
-                            count++;
-                            if (count < resultCount)
-                            {
-                                // Result buffer
-                                continue;
-                            }
-
-                            var sb = new StringBuilder();
-                            foreach (var result in results)
-                            {
-                                sb.AppendLine(result);
-                            }
-
-                            results.Clear();
-
-                            count = 0;
-
-                            var now = DateTime.UtcNow;
-
-                            if (duration == new TimeSpan() || now.Subtract(start) < duration)
-                            {
-                                continue;
-                            }
-
-                            // Time elapsed
-                            EndStreaming(request);
+                            // [DC] Streaming was cancelled out of band
                             return;
                         }
-                    }
-                    catch (Exception)
-                    {
-                        EndStreaming(request);
-                    }
-                    // Stream dried up
 
+                        if (readString.Equals(Environment.NewLine))
+                        {
+                            // Keep-Alive
+                            continue;
+                        }
+
+                        if (readString.Equals("<html>"))
+                        {
+                            // We're looking at a 401 or similar; construct error result?
+                            return;
+                        }
+
+                        results.Add(readString);
+
+                        count++;
+                        if (count < resultCount)
+                        {
+                            // Result buffer
+                            continue;
+                        }
+
+                        var sb = new StringBuilder();
+                        foreach (var result in results)
+                        {
+                            sb.AppendLine(result);
+                        }
+
+                        results.Clear();
+
+                        count = 0;
+
+                        var now = DateTime.UtcNow;
+
+                        if (duration == new TimeSpan() || now.Subtract(start) < duration)
+                        {
+                            continue;
+                        }
+
+                        // Time elapsed
+                        return;
+                    }
                 }
-                EndStreaming(request);
+                catch
+                {
+                }
+                finally
+                {
+                    EndStreaming(request);
+                }
             }
-
         }
 
         private void WebQueryNewStreamMessageEvent(Stream message)
@@ -582,6 +619,7 @@ namespace Hammock.Web
             OnQueryResponse(args);
         }
 
+        // TODO make part of StreamOptions
         private const char StreamResultDelimiter = '\r';
 
         private string ProcessBuffer(string bufferString)
@@ -792,7 +830,7 @@ namespace Hammock.Web
             var encoding = Encoding ?? new UTF8Encoding();
             if (post != null)
             {
-                Trace.WriteLine(encoding.GetString(post, 0, post.Length));
+                Trace.WriteLineIf(TraceEnabled, encoding.GetString(post, 0, post.Length));
             }
 #endif
         }
@@ -953,20 +991,32 @@ namespace Hammock.Web
 
         protected virtual void PostAsyncResponseCallback(IAsyncResult asyncResult)
         {
-            var state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
-            if (state == null)
-            {
-                throw new ArgumentNullException("asyncResult",
-                                                "The asynchronous post failed to return its state");
-            }
+#if WindowsPhone
+            Interlocked.Increment(ref completed);
+#endif
 
-            var request = state.First;
-            if (request == null)
+            WebRequest request;
+            Triplet<WebRequest, Triplet<ICache, object, string>, object> state;
+            try
             {
-                throw new ArgumentNullException("asyncResult",
-                                                "The asynchronous post failed to return a request");
-            }
+                state = asyncResult.AsyncState as Triplet<WebRequest, Triplet<ICache, object, string>, object>;
+                if (state == null)
+                {
+                    throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return its state");
+                }
 
+                request = state.First;
+                if (request == null)
+                {
+                    throw new ArgumentNullException("asyncResult", "The asynchronous post failed to return a request");
+                }
+            }
+            catch(Exception ex)
+            {
+                var args = new WebQueryResponseEventArgs(new MemoryStream(), ex);
+                OnQueryResponse(args);
+                return;
+            }
 
             try
             {

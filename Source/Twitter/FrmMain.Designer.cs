@@ -296,6 +296,7 @@
             this.Controls.Add(this.pnlSidebar);
             this.Controls.Add(this.tmlTimeline);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

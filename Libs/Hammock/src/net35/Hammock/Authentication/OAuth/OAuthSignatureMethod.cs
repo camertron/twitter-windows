@@ -8,12 +8,12 @@ namespace Hammock.Authentication.OAuth
 #endif
     public enum OAuthSignatureMethod
     {
-#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20 && !MonoTouch
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20 && !MonoTouch && !NETCF
         [EnumMember] HmacSha1,
         [EnumMember] PlainText,
         [EnumMember] RsaSha1
 #else
-        HmacSha1,
+      HmacSha1,
         PlainText,
         RsaSha1
 #endif

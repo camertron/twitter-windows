@@ -47,6 +47,7 @@ namespace Twitter.Json
                 case ",": return TokenType.Comma;
                 case ":": return TokenType.Colon;
                 case "\"": return TokenType.Quote;
+                case "'": return TokenType.Quote;
                 case "\\": return TokenType.Backslash;
                 case "[": return TokenType.OpenBracket;
                 case "]": return TokenType.CloseBracket;

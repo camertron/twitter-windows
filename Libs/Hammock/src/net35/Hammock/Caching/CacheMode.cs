@@ -8,12 +8,12 @@ namespace Hammock.Caching
 #endif
     public enum CacheMode
     {
-#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20 && !MonoTouch
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20 && !MonoTouch && !NETCF
         [EnumMember] NoExpiration,
         [EnumMember] AbsoluteExpiration,
         [EnumMember] SlidingExpiration
 #else
-        NoExpiration,
+      NoExpiration,
         AbsoluteExpiration,
         SlidingExpiration
 #endif

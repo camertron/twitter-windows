@@ -32,13 +32,13 @@
             this.btnTweet = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.lblCharsLeft = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.pnlTweet = new System.Windows.Forms.Panel();
             this.pbAvatar = new System.Windows.Forms.PictureBox();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pbButtonBar = new System.Windows.Forms.PictureBox();
             this.ttfTextField = new Twitter.Controls.TweetTextField();
-            this.panel1.SuspendLayout();
+            this.pnlTweet.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbButtonBar)).BeginInit();
             this.SuspendLayout();
             // 
             // btnTweet
@@ -85,15 +85,15 @@
             this.lblCharsLeft.Text = "140";
             this.lblCharsLeft.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // panel1
+            // pnlTweet
             // 
-            this.panel1.BackColor = System.Drawing.Color.White;
-            this.panel1.Controls.Add(this.pbAvatar);
-            this.panel1.Controls.Add(this.ttfTextField);
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(438, 110);
-            this.panel1.TabIndex = 4;
+            this.pnlTweet.BackColor = System.Drawing.Color.White;
+            this.pnlTweet.Controls.Add(this.pbAvatar);
+            this.pnlTweet.Controls.Add(this.ttfTextField);
+            this.pnlTweet.Location = new System.Drawing.Point(0, 0);
+            this.pnlTweet.Name = "pnlTweet";
+            this.pnlTweet.Size = new System.Drawing.Size(438, 110);
+            this.pnlTweet.TabIndex = 4;
             // 
             // pbAvatar
             // 
@@ -103,15 +103,15 @@
             this.pbAvatar.TabIndex = 1;
             this.pbAvatar.TabStop = false;
             // 
-            // pictureBox2
+            // pbButtonBar
             // 
-            this.pictureBox2.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox2.BackgroundImage")));
-            this.pictureBox2.Location = new System.Drawing.Point(-1, 110);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(439, 44);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox2.TabIndex = 5;
-            this.pictureBox2.TabStop = false;
+            this.pbButtonBar.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pbButtonBar.BackgroundImage")));
+            this.pbButtonBar.Location = new System.Drawing.Point(-1, 110);
+            this.pbButtonBar.Name = "pbButtonBar";
+            this.pbButtonBar.Size = new System.Drawing.Size(439, 44);
+            this.pbButtonBar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbButtonBar.TabIndex = 5;
+            this.pbButtonBar.TabStop = false;
             // 
             // ttfTextField
             // 
@@ -139,18 +139,18 @@
             this.Controls.Add(this.lblCharsLeft);
             this.Controls.Add(this.btnTweet);
             this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.pictureBox2);
-            this.Controls.Add(this.panel1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Controls.Add(this.pbButtonBar);
+            this.Controls.Add(this.pnlTweet);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FrmTweet";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "New Tweet";
-            this.panel1.ResumeLayout(false);
+            this.pnlTweet.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbAvatar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbButtonBar)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -161,9 +161,9 @@
         private System.Windows.Forms.Button btnCancel;
         private Controls.TweetTextField ttfTextField;
         private System.Windows.Forms.Label lblCharsLeft;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel pnlTweet;
         private System.Windows.Forms.PictureBox pbAvatar;
-        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.PictureBox pbButtonBar;
 
     }
 }

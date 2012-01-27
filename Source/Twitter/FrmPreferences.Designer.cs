@@ -39,7 +39,7 @@
             this.tpAccounts = new System.Windows.Forms.TabPage();
             this.btnRemove = new System.Windows.Forms.Button();
             this.btnAdd = new System.Windows.Forms.Button();
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.lbAccounts = new System.Windows.Forms.ListBox();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.tcTabs.SuspendLayout();
@@ -130,7 +130,7 @@
             // 
             this.tpAccounts.Controls.Add(this.btnRemove);
             this.tpAccounts.Controls.Add(this.btnAdd);
-            this.tpAccounts.Controls.Add(this.listBox1);
+            this.tpAccounts.Controls.Add(this.lbAccounts);
             this.tpAccounts.Location = new System.Drawing.Point(4, 22);
             this.tpAccounts.Name = "tpAccounts";
             this.tpAccounts.Padding = new System.Windows.Forms.Padding(3);
@@ -148,6 +148,7 @@
             this.btnRemove.TabIndex = 2;
             this.btnRemove.Text = "-";
             this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
             // btnAdd
             // 
@@ -158,14 +159,15 @@
             this.btnAdd.TabIndex = 1;
             this.btnAdd.Text = "+";
             this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
-            // listBox1
+            // lbAccounts
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(12, 12);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(320, 147);
-            this.listBox1.TabIndex = 0;
+            this.lbAccounts.FormattingEnabled = true;
+            this.lbAccounts.Location = new System.Drawing.Point(12, 12);
+            this.lbAccounts.Name = "lbAccounts";
+            this.lbAccounts.Size = new System.Drawing.Size(320, 147);
+            this.lbAccounts.TabIndex = 0;
             // 
             // btnOk
             // 
@@ -222,7 +224,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.ListBox lbAccounts;
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.Button btnAdd;
     }

@@ -35,11 +35,6 @@ namespace Twitter.Controls
             m_stsControls = new Stack<TimelineStatus>();
         }
 
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            //MessageBox.Show("Timeline");
-        }
-
         public int InternalHeight
         {
             get { return m_iTotalControlHeight; }
@@ -49,6 +44,8 @@ namespace Twitter.Controls
         {
             TimelineStatus tsNewStatus = new TimelineStatus(stToAdd, bAPI);
             TimelineStatus tsOldTop = null;
+
+            DisableLoadingAnimation();
 
             if (m_stsControls.Count > 0)
                 tsOldTop = m_stsControls.Peek();
@@ -77,6 +74,13 @@ namespace Twitter.Controls
 
             tsNewStatus.Visible = true;
             UpdateLayout();
+        }
+
+        private void DisableLoadingAnimation()
+        {
+            lblLoadingTweets.Visible = false;
+            pbLoadingAnimation.Visible = false;
+            pbLoadingAnimation.Image = null;
         }
 
         private void HookupStatusEvents(TimelineStatus tsNewStatus)
@@ -166,6 +170,9 @@ namespace Twitter.Controls
                 while (stsEnum.MoveNext())
                     stsEnum.Current.Width = this.Width;
             }
+
+            lblLoadingTweets.Left = (this.Width / 2) - ((lblLoadingTweets.Width + pbLoadingAnimation.Width) / 2);
+            pbLoadingAnimation.Left = lblLoadingTweets.Left - (pbLoadingAnimation.Width + 10);
         }
 
         [EditorBrowsable(EditorBrowsableState.Always)]

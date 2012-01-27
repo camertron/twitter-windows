@@ -42,20 +42,14 @@ namespace Hammock
             }
             set
             {
-                if (_entity != null && _entity.Equals(value))
+                if (Equals(_entity, value))
                 {
                     return;
                 }
 
                 _entity = value;
                 OnPropertyChanged("Entity");
-
-                // [DC] Automatically posts an entity unless put is declared
-                RequestEntityType = _entity.GetType();
-                if (_entity != null && (Method != WebMethod.Post && Method != WebMethod.Put))
-                {
-                    Method = WebMethod.Post;
-                }
+                RequestEntityType = _entity == null ? null : _entity.GetType();
             }
         }
 
@@ -80,7 +74,7 @@ namespace Hammock
         public virtual Type ResponseEntityType { get; set; }
         public virtual Type RequestEntityType { get; set; }
 
-        public Uri BuildEndpoint(RestClient client)
+        public string BuildEndpoint(RestClient client)
         {
             var sb = new StringBuilder();
 
@@ -102,18 +96,15 @@ namespace Hammock
             }
             sb.Append(path.IsNullOrBlank() ? "" : path.StartsWith("/") ? path.Substring(1) : path);
 
-            Uri uri;
-            Uri.TryCreate(sb.ToString(), UriKind.RelativeOrAbsolute, out uri);
+            var queryStringHandling = QueryHandling ?? client.QueryHandling ?? Hammock.QueryHandling.None;
 
-            // [DC]: If the path came in with parameters attached, we should scrub those
-            WebParameterCollection parameters;
-            uri = uri.UriMinusQuery(out parameters);
-            foreach (var parameter in parameters)
+            switch (queryStringHandling)
             {
-                Parameters.Add(parameter);
+                case Hammock.QueryHandling.AppendToParameters:
+                    return WebExtensions.UriMinusQuery(sb.ToString(), Parameters);
+                default:
+                    return sb.ToString();
             }
-
-            return uri;
         }
 
         public void ExpectHeader(string name, string value)

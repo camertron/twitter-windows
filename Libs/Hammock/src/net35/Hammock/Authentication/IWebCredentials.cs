@@ -7,11 +7,13 @@ namespace Hammock.Authentication
         WebQuery GetQueryFor(string url, 
                              RestBase request, 
                              IWebQueryInfo info, 
-                             WebMethod method);
+                             WebMethod method,
+                             bool enableTrace);
 
         WebQuery GetQueryFor(string url,
                              WebParameterCollection parameters,
                              IWebQueryInfo info,
-                             WebMethod method);
+                             WebMethod method,
+                             bool enableTrace);
     }
 }

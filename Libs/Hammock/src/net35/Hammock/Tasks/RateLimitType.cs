@@ -8,11 +8,11 @@ namespace Hammock.Tasks
 #endif
     public enum RateLimitType
     {
-#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20 && !MonoTouch
+#if !SILVERLIGHT && !Smartphone && !ClientProfiles && !NET20 && !MonoTouch && !NETCF
         [EnumMember] ByPercent,
         [EnumMember] ByPredicate
 #else
-        ByPercent,
+      ByPercent,
         ByPredicate
 #endif
     }

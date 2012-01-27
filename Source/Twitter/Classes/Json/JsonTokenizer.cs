@@ -113,6 +113,9 @@ namespace Twitter.Json
 
         private string QuoteTrim(string sToTrim)
         {
+            //remove whitespace first
+            sToTrim = sToTrim.Trim();
+
             if (sToTrim.Length >= 2)
             {
                 char cFirst = sToTrim[0];
